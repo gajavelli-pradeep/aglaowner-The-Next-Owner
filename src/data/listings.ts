@@ -1,0 +1,54 @@
+import type { ConfirmFlyerData, ListingType, MyListing, SampleListing } from "@/types/listing";
+
+export const sampleListings: Record<ListingType, SampleListing[]> = {
+  business: [
+    { title: "Corner café, HSR Layout", loc: "Bengaluru, Karnataka", price: "₹9L–12L", legacy: "4 yrs running", icon: "ti-coffee", tag: "OTP verified", warn: false, desc: "A well-established corner café with steady footfall, outdoor seating and a loyal regular base. Fully fitted kitchen, furniture and signage included in the asking price.", turnover: "₹3L–7L / month", reason: "Relocating" },
+    { title: "Family restaurant, 40-seat", loc: "Pune, Maharashtra", price: "₹18L–22L", legacy: "7 yrs running", icon: "ti-soup", tag: "OTP verified", warn: false, desc: "A long-running family restaurant with a loyal local base and strong weekend dinner traffic. Includes full kitchen equipment, dining furniture and an active Swiggy/Zomato presence.", turnover: "₹7L+ / month", reason: "Starting new venture" },
+    { title: "Cloud kitchen, multi-cuisine", loc: "Hyderabad, Telangana", price: "₹4L–6L", legacy: "2 yrs running", icon: "ti-tools-kitchen-2", tag: "12 days left", warn: true, desc: "A delivery-only multi-cuisine kitchen with an established presence across food delivery apps. Compact fit-out, easy to run with a lean team.", turnover: "₹1L–3L / month", reason: "Health reasons" },
+    { title: "Bakery & patisserie counter", loc: "Ahmedabad, Gujarat", price: "₹7L–10L", legacy: "3 yrs running", icon: "ti-bread", tag: "OTP verified", warn: false, desc: "A neighbourhood bakery known for its cakes and evening snacks. Comes with baking equipment, display counters and a small regular subscription base.", turnover: "₹3L–7L / month", reason: "Partnership issue" },
+    { title: "Filter coffee & tiffin shop", loc: "Chennai, Tamil Nadu", price: "₹5L–8L", legacy: "6 yrs running", icon: "ti-cup", tag: "OTP verified", warn: false, desc: "A well-loved tiffin shop with a strong breakfast and lunch crowd. Six years of goodwill in the neighbourhood, with an easily transferable lease.", turnover: "₹1L–3L / month", reason: "Relocating" },
+    { title: "Juice bar & quick-eats stall", loc: "Jaipur, Rajasthan", price: "₹2L–3.5L", legacy: "1.5 yrs running", icon: "ti-glass-full", tag: "4 days left", warn: true, desc: "A compact juice and quick-eats stall in a high-footfall market lane. Low overhead, simple to operate, good starter business.", turnover: "Under ₹1L / month", reason: "Other" },
+  ],
+  equipment: [
+    { title: "Commercial espresso machine", loc: "Bengaluru, Karnataka", price: "₹45,000", icon: "ti-coffee", tag: "OTP verified", warn: false, desc: "Well-maintained 3-group commercial espresso machine, recently serviced. Selling as we're downsizing our kitchen setup.", condition: "Used - good", brand: "La Marzocco, 3-group", reason: "Downsizing" },
+    { title: "Salon styling chairs (set of 4)", loc: "Mumbai, Maharashtra", price: "₹28,000", icon: "ti-scissors", tag: "OTP verified", warn: false, desc: "Four hydraulic styling chairs from our salon renovation. Some wear but fully functional.", condition: "Used - fair", brand: "Generic hydraulic", reason: "Renovation" },
+    { title: "Commercial deep freezer", loc: "Pune, Maharashtra", price: "₹32,000", icon: "ti-tools-kitchen-2", tag: "6 days left", warn: true, desc: "Barely used deep freezer, moving to a bigger unit. Original bill and warranty available.", condition: "Like new", brand: "Blue Star, 400L", reason: "Upgrading" },
+    { title: "Gym equipment bundle", loc: "Hyderabad, Telangana", price: "₹85,000", icon: "ti-barbell", tag: "OTP verified", warn: false, desc: "Treadmill, cross-trainer and 4 weight stations from our studio closure. Can split or sell as a set.", condition: "Used - good", brand: "Mixed brands, 6 machines", reason: "Business closing" },
+    { title: "Classroom furniture set", loc: "Chennai, Tamil Nadu", price: "₹18,000", icon: "ti-school", tag: "OTP verified", warn: false, desc: "Playschool furniture in good condition, moving to a smaller space.", condition: "Used - fair", brand: "20 chairs, 5 tables", reason: "Downsizing" },
+    { title: "Diagnostic ultrasound unit", loc: "Ahmedabad, Gujarat", price: "₹1,20,000", icon: "ti-stethoscope", tag: "3 days left", warn: true, desc: "Portable ultrasound unit, well-maintained with service records. Upgrading to a newer model.", condition: "Used - good", brand: "Portable, GE", reason: "Upgrading" },
+  ],
+  lease: [
+    { title: "Fitted café space, Koramangala", loc: "Bengaluru, Karnataka", price: "₹2,00,000", icon: "ti-coffee", tag: "OTP verified", warn: false, desc: "Fully fitted café space with kitchen equipment, seating and signage included. Landlord has agreed to transfer the lease directly.", leaseLeft: "18 months left", rent: "₹45,000/month", reason: "Relocating" },
+    { title: "Ready-to-run playschool space", loc: "Chennai, Tamil Nadu", price: "₹1,20,000", icon: "ti-school", tag: "OTP verified", warn: false, desc: "Playschool space with classroom furniture and play equipment included. Owner relocating out of the city.", leaseLeft: "2+ years left", rent: "₹28,000/month", reason: "Relocating" },
+    { title: "Fitted salon space, Bandra", loc: "Mumbai, Maharashtra", price: "₹3,50,000", icon: "ti-scissors", tag: "9 days left", warn: true, desc: "Salon space with styling stations and fittings included. High footfall street-facing location.", leaseLeft: "8 months left", rent: "₹65,000/month", reason: "Business closing" },
+    { title: "Retail shop space, MG Road", loc: "Pune, Maharashtra", price: "₹1,75,000", icon: "ti-shopping-bag", tag: "OTP verified", warn: false, desc: "Shelving, billing counter and display fixtures included. Landlord not yet informed, can be arranged.", leaseLeft: "14 months left", rent: "₹38,000/month", reason: "Financial reasons" },
+    { title: "Fitted clinic space, Banjara Hills", loc: "Hyderabad, Telangana", price: "₹2,50,000", icon: "ti-stethoscope", tag: "OTP verified", warn: false, desc: "Clinic space with furniture and fittings included. Landlord has agreed to transfer directly.", leaseLeft: "2+ years left", rent: "₹55,000/month", reason: "Relocating" },
+    { title: "Furnished PG space, Satellite", loc: "Ahmedabad, Gujarat", price: "₹90,000", icon: "ti-building-cottage", tag: "5 days left", warn: true, desc: "Furnished PG space with beds, storage and kitchen included. New tenant re-signs directly with landlord.", leaseLeft: "6 months left", rent: "₹32,000/month", reason: "Other" },
+  ],
+  inventory: [
+    { title: "Mixed apparel lot, Andheri", loc: "Mumbai, Maharashtra", price: "₹50,000", icon: "ti-package", tag: "OTP verified", warn: false, desc: "Mixed lot of shirts and trousers across sizes, from a season-end clearance. Never worn, factory-packed.", lotSize: "~350 pieces", category: "New / unused", reason: "Season change" },
+    { title: "Packaged snacks, assorted brands", loc: "Bengaluru, Karnataka", price: "₹18,000", icon: "ti-package", tag: "6 days left", warn: true, desc: "Assorted packaged snacks from an over-ordered batch. Expiry dates vary, mostly 3+ months out. Selling as one lot.", lotSize: "~40 cartons", category: "New, mixed expiry", reason: "Overstock" },
+    { title: "Seasonal decor & gift items", loc: "Delhi", price: "₹22,000", icon: "ti-gift", tag: "OTP verified", warn: false, desc: "Leftover festive decor and gifting items from last season. Never used, still boxed.", lotSize: "~150 pieces", category: "Seasonal overstock", reason: "Season change" },
+    { title: "Salon consumables lot, Pune", loc: "Pune, Maharashtra", price: "₹9,500", icon: "ti-package", tag: "OTP verified", warn: false, desc: "Unopened shampoos, colours and consumables from a salon downsizing its stock room.", lotSize: "~60 units", category: "New, unopened", reason: "Overstock" },
+    { title: "Classroom stationery & supplies", loc: "Chennai, Tamil Nadu", price: "₹12,000", icon: "ti-package", tag: "OTP verified", warn: false, desc: "Notebooks, art supplies and classroom materials, over-ordered for the term. All unused.", lotSize: "~200 items", category: "New / unused", reason: "Overstock" },
+    { title: "Mixed hardware & fittings", loc: "Hyderabad, Telangana", price: "₹27,000", icon: "ti-package", tag: "4 days left", warn: true, desc: "Assorted hardware and fittings left over from a store closing down. Mixed condition, priced accordingly.", lotSize: "~100 pieces", category: "Mixed condition", reason: "Store closing" },
+  ],
+};
+
+export const confirmFlyerData: Record<string, ConfirmFlyerData> = {
+  business: { title: "Corner café, HSR Layout", price: "₹9L–12L", loc: "Bengaluru, Karnataka", highlight: "4 years running · steady footfall", icon: "ti-coffee", ref: "AGL-7K21", filename: "corner-cafe-hsr-layout" },
+  equipment: { title: "Commercial espresso machine", price: "₹45,000", loc: "Bengaluru, Karnataka", highlight: "Used - good · La Marzocco, 3-group", icon: "ti-coffee", ref: "AGL-E482", filename: "commercial-espresso-machine" },
+  lease: { title: "Fitted café space, HSR Layout", price: "₹2,00,000", loc: "Bengaluru, Karnataka", highlight: "18 months lease left · furniture & kitchen equipment included", icon: "ti-coffee", ref: "AGL-L317", filename: "fitted-cafe-space-hsr-layout" },
+  inventory: { title: "Mixed apparel lot, Andheri", price: "₹50,000", loc: "Mumbai, Maharashtra", highlight: "~350 pieces · new / unused", icon: "ti-package", ref: "AGL-I624", filename: "mixed-apparel-lot-andheri" },
+};
+
+/** aglaowner.in demo referrer identity used to block a referrer from redeeming their own code. */
+export const demoReferrer = { mobile: "+9198xxxxxxx1", code: "AGL-REF-7F42" };
+
+export const myListings: MyListing[] = [
+  { id: "active-1", title: "Corner café, HSR Layout", ref: "AGL-7K21", type: "business", icon: "ti-coffee", status: "active", statusNote: "Active, 42 days left", reactivateScreen: "" },
+  { id: "biz-archived", title: "Cloud kitchen, multi-cuisine", ref: "AGL-3P09", type: "business", icon: "ti-tools-kitchen-2", status: "archived", statusNote: "Archived, 64 days left to reactivate", reactivatePrice: "₹499", reactivateScreen: "reactivate-confirm" },
+  { id: "equip-archived", title: "Commercial espresso machine", ref: "AGL-E203", type: "equipment", icon: "ti-coffee", status: "archived", statusNote: "Archived, 12 days left to reactivate", reactivatePrice: "₹79", reactivateScreen: "equip-reactivate-confirm" },
+  { id: "lease-archived", title: "Fitted café space, Koramangala", ref: "AGL-L317", type: "lease", icon: "ti-coffee", status: "archived", statusNote: "Archived, 9 days left to reactivate", reactivatePrice: "₹199", reactivateScreen: "lease-reactivate-confirm" },
+  { id: "inv-archived", title: "Mixed apparel lot, Andheri", ref: "AGL-I624", type: "inventory", icon: "ti-package", status: "archived", statusNote: "Archived, 14 days left to reactivate", reactivatePrice: "₹129", reactivateScreen: "inventory-reactivate-confirm" },
+];
