@@ -14,7 +14,7 @@ export function DoorTile({
 }: BaseProps & { icon: TablerIcon; label: string; sub: string }) {
   return (
     <button
-      className="flex w-full flex-col items-center rounded-[10px] border border-line bg-paper px-5 py-7 text-center transition-[border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-oxide"
+      className="group flex w-full flex-col items-center rounded-[10px] border border-line bg-paper px-5 py-7 text-center transition-[border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-oxide"
       {...props}
     >
       <Icon size={28} className="mb-2.5 text-stamp-green" stroke={1.75} />
