@@ -1,6 +1,6 @@
 import { pricingPlans } from "@/data/pricing";
 import type { PricingPlan } from "@/types/listing";
-import { createClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/server";
 
 interface ListingTypeSettingsRow {
   type: string;
@@ -45,7 +45,7 @@ export async function getPricingPlans(): Promise<PricingPlan[]> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     // Bound the query -- a misconfigured/paused/unreachable project must degrade fast,
     // not hang the whole homepage. Verified live: an unreachable host took 7+s without
     // this before falling back.

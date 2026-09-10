@@ -29,6 +29,20 @@ export async function createClient() {
   );
 }
 
+/**
+ * Plain, cookie-free client for public/anonymous reads (e.g. the pricing section) that
+ * must stay statically cacheable. createClient() above calls cookies(), which opts the
+ * whole page into dynamic rendering per-request -- verified via `next build`: adding it
+ * flipped "/" from Static to Dynamic the moment Supabase env vars were set. Use this one
+ * whenever the read doesn't need the caller's session.
+ */
+export function createAnonClient() {
+  return createSupabaseJsClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  );
+}
+
 /** Service-role client — bypasses RLS entirely. Only for trusted server code (payment webhooks). Never import from a client file. */
 export function createServiceRoleClient() {
   return createSupabaseJsClient(
