@@ -43,3 +43,6 @@ next-env.d.ts
 
 # contact details (client/mentor emails), never committed
 CLIENT.md
+
+# agent tooling state (worktree checkouts, session artifacts)
+.claude/
