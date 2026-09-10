@@ -13,7 +13,7 @@ import { updateSession } from "@/lib/supabase/proxy-session";
  * confirmed by a live dev-server check before this was scoped down.
  */
 export async function proxy(request: NextRequest) {
-  const isLoginRoute = request.nextUrl.pathname.startsWith("/admin/login");
+  const isLoginRoute = request.nextUrl.pathname === "/admin/login";
   if (isLoginRoute) return NextResponse.next();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
