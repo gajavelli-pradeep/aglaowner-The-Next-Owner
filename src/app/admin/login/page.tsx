@@ -4,12 +4,13 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/ui/Buttons";
+import { safeNextPath } from "@/lib/safe-redirect";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const next = useSearchParams().get("next") ?? "/admin";
+  const next = safeNextPath(useSearchParams().get("next"));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
