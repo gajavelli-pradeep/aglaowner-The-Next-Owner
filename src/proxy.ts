@@ -28,7 +28,13 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    // Copy the refreshed-session cookies from updateSession()'s response onto the
+    // redirect -- a bare NextResponse.redirect() carries none of its own, so a
+    // signed-in-but-non-admin user's just-refreshed session cookie would otherwise
+    // be silently dropped. Found by /strix audit (2026-09-10).
+    const redirectResponse = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   return response;

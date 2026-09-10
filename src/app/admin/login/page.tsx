@@ -18,7 +18,14 @@ function LoginForm() {
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(next)}` },
+      options: {
+        // Never create a new account from this public form -- only a pre-provisioned
+        // admin (created via the Supabase dashboard/API with app_metadata.role="admin")
+        // can request a link. Otherwise this is an open account-creation + email-send
+        // endpoint for any address. Found by /strix audit (2026-09-10).
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(next)}`,
+      },
     });
     if (signInError) setError(signInError.message);
     else setSent(true);
