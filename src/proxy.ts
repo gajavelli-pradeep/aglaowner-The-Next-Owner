@@ -1,35 +1,37 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/proxy-session";
 
 /**
- * ponytail: Basic Auth stopgap until Supabase admin-role auth is wired up.
- * Blocks anonymous access to /admin — see requirements/AUDIT.md finding #4.
- * Upgrade path: replace with a Supabase session check once auth exists.
+ * Gates /admin behind a real signed-in session with app_metadata.role === "admin"
+ * (never user_metadata -- that's user-editable). Replaces the earlier Basic Auth
+ * stopgap -- see requirements/AUDIT.md #4.
+ *
+ * Scoped to /admin only: no other route uses Supabase auth yet, and running the
+ * session-refresh call site-wide would throw on every request (including the
+ * public marketplace and referral pages) until real Supabase env vars exist --
+ * confirmed by a live dev-server check before this was scoped down.
  */
-export function proxy(request: NextRequest) {
-  const user = process.env.ADMIN_BASIC_AUTH_USER;
-  const pass = process.env.ADMIN_BASIC_AUTH_PASS;
+export async function proxy(request: NextRequest) {
+  const isLoginRoute = request.nextUrl.pathname.startsWith("/admin/login");
+  if (isLoginRoute) return NextResponse.next();
 
-  if (!user || !pass) {
-    // Fail closed: no credentials configured means /admin stays locked, not open.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    // Fail closed: no Supabase project configured yet means /admin stays locked, not open.
     return new NextResponse("Admin access is not configured", { status: 503 });
   }
 
-  const auth = request.headers.get("authorization");
-  if (auth) {
-    const [scheme, encoded] = auth.split(" ");
-    if (scheme === "Basic" && encoded) {
-      const [reqUser, reqPass] = atob(encoded).split(":");
-      if (reqUser === user && reqPass === pass) {
-        return NextResponse.next();
-      }
-    }
+  const { response, claims } = await updateSession(request);
+  const role = (claims?.app_metadata as { role?: string } | undefined)?.role;
+
+  if (!claims || role !== "admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin/login";
+    url.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(url);
   }
 
-  return new NextResponse("Authentication required", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="aglaowner admin"' },
-  });
+  return response;
 }
 
 export const config = {
