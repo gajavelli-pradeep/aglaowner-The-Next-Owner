@@ -15,6 +15,7 @@ export function HomeScreen({
   onCategory,
   onAllCategories,
   onPricingCta,
+  pricingPlans,
 }: {
   onSell: () => void;
   onBuy: () => void;
@@ -22,6 +23,7 @@ export function HomeScreen({
   onCategory: (name: string) => void;
   onAllCategories: () => void;
   onPricingCta: (screen: PricingPlan["ctaScreen"]) => void;
+  pricingPlans: PricingPlan[];
 }) {
   return (
     <div>
@@ -30,7 +32,7 @@ export function HomeScreen({
       <CategoryGrid onCategory={onCategory} onAll={onAllCategories} />
       <HowItWorks />
       <ArchiveSection onReactivate={onReactivate} />
-      <Pricing onCta={onPricingCta} />
+      <Pricing onCta={onPricingCta} plans={pricingPlans} />
       <Faq />
       <CtaBand onSell={onSell} onBuy={onBuy} />
     </div>

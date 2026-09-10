@@ -2,11 +2,9 @@
 
 import { IconCheck, IconArchive, IconCircleCheck, IconReceipt2 } from "@tabler/icons-react";
 import { PriceCta } from "@/components/ui/Buttons";
-import { getPricingPlans } from "@/lib/data/pricing";
 import type { PricingPlan } from "@/types/listing";
 
-export function Pricing({ onCta }: { onCta: (screen: PricingPlan["ctaScreen"]) => void }) {
-  const plans = getPricingPlans();
+export function Pricing({ onCta, plans }: { onCta: (screen: PricingPlan["ctaScreen"]) => void; plans: PricingPlan[] }) {
   return (
     <section id="pricing" className="px-6 py-11 sm:py-16">
       <div className="mx-auto max-w-[1080px]">
