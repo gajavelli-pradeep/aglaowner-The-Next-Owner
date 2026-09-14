@@ -13,6 +13,7 @@ const NAV_ITEMS: { section: AdminSection; label: string; icon: string }[] = [
   { section: "rules", label: "Reward Rules", icon: "ti-settings" },
   { section: "listing", label: "Listing Settings", icon: "ti-adjustments" },
   { section: "providers", label: "Voucher Providers", icon: "ti-plug-connected" },
+  { section: "admins", label: "Admins", icon: "ti-user-plus" },
 ];
 
 /** .sidebar — admin console left nav; sidebar click drives section state, no nested routes. */

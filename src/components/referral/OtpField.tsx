@@ -5,7 +5,7 @@ import { IconAlertCircle } from "@tabler/icons-react";
 import { OtpStatus, RefError } from "@/components/ui/Misc";
 import { isValidMobile } from "@/lib/validation";
 
-/** .otprow — mobile number + Send OTP button + verified status, shared by both referral forms. */
+/** .otprow — country code + mobile number + Send OTP button + verified status, shared by both referral forms. */
 export function OtpField({ verified, onSend }: { verified: boolean; onSend: () => void }) {
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState(false);
@@ -23,6 +23,9 @@ export function OtpField({ verified, onSend }: { verified: boolean; onSend: () =
     <div>
       <label className="mb-2 block text-[13px] font-semibold">Your mobile number</label>
       <div className="flex gap-2.5">
+        <span className="flex w-[58px] shrink-0 items-center justify-center rounded border border-line bg-paper-2 px-2 py-[11px] font-sans text-sm text-ink-soft">
+          +91
+        </span>
         <input
           type="tel"
           value={mobile}
@@ -30,7 +33,8 @@ export function OtpField({ verified, onSend }: { verified: boolean; onSend: () =
             setMobile(e.target.value);
             setError(false);
           }}
-          placeholder="+91 98xxxxxxx1"
+          placeholder="98xxxxxxx1"
+          maxLength={10}
           className="w-full flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] font-sans text-sm text-ink"
         />
         <button

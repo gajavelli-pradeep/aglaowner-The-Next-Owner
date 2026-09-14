@@ -26,6 +26,7 @@ import {
   IconFileInvoice,
   IconInfoCircle,
   IconCircleCheck,
+  IconUserPlus,
 } from "@tabler/icons-react";
 import type { TablerIcon } from "@/types/listing";
 
@@ -58,6 +59,7 @@ const map: Record<string, TablerIcon> = {
   "ti-file-invoice": IconFileInvoice,
   "ti-info-circle": IconInfoCircle,
   "ti-circle-check": IconCircleCheck,
+  "ti-user-plus": IconUserPlus,
 };
 
 export function iconFor(name: string): TablerIcon {

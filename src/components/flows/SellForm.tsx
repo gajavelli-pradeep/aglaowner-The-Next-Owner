@@ -246,6 +246,9 @@ export function SellForm({
               Your mobile number <span className="text-[11px] font-normal text-ink-soft">this is how you&apos;ll manage &amp; reactivate this listing later</span>
             </label>
             <div className="flex gap-2.5">
+              <span className="flex w-[58px] shrink-0 items-center justify-center rounded border border-line bg-paper-2 px-2 py-[11px] text-sm text-ink-soft">
+                +91
+              </span>
               <input
                 type="tel"
                 value={mobile}
@@ -253,7 +256,8 @@ export function SellForm({
                   setMobile(e.target.value);
                   setMobileError(false);
                 }}
-                placeholder="+91 98xxxxxxx1"
+                placeholder="98xxxxxxx1"
+                maxLength={10}
                 className="flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
               />
               <button

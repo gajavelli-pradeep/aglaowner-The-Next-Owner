@@ -26,8 +26,8 @@ interface SelectedCategory {
 
 const HOME: SelectedCategory = { name: "", icon: "" };
 
-export function AglaownerApp({ pricingPlans }: { pricingPlans: PricingPlan[] }) {
-  const [history, setHistory] = useState<Screen[]>(["home"]);
+export function AglaownerApp({ pricingPlans, initialScreen = "home" }: { pricingPlans: PricingPlan[]; initialScreen?: Screen }) {
+  const [history, setHistory] = useState<Screen[]>([initialScreen]);
   const [category, setCategory] = useState<SelectedCategory>(HOME);
   const [sellType, setSellType] = useState<ListingType>("business");
   const [buyType, setBuyType] = useState<ListingType>("business");
@@ -132,10 +132,6 @@ export function AglaownerApp({ pricingPlans }: { pricingPlans: PricingPlan[] }) 
       <Header
         isFlow={isFlow}
         onLogoClick={goHome}
-        onNavigate={(s) => {
-          if (s === "sell-category") startSell();
-          else goTo(s);
-        }}
         onBack={goBack}
       />
 
