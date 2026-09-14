@@ -7,6 +7,7 @@ import { ReferrersSection } from "@/components/admin/ReferrersSection";
 import { RewardRulesSection } from "@/components/admin/RewardRulesSection";
 import { ListingSettingsSection } from "@/components/admin/ListingSettingsSection";
 import { ProvidersSection } from "@/components/admin/ProvidersSection";
+import { AdminsSection } from "@/components/admin/AdminsSection";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/lib/useToast";
 import type { AdminSection, ListingTypeSetting, AdminCreditRule, AdminRewardTier, AdminPromotion } from "@/types/admin";
@@ -39,6 +40,7 @@ export function AdminApp({
         )}
         {section === "listing" && <ListingSettingsSection onToast={showToast} initialSettings={listingTypeSettings} />}
         {section === "providers" && <ProvidersSection onToast={showToast} />}
+        {section === "admins" && <AdminsSection />}
       </main>
       <Toast message={message} show={show} />
     </div>

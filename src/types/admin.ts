@@ -1,4 +1,4 @@
-export type AdminSection = "overview" | "referrers" | "rules" | "listing" | "providers";
+export type AdminSection = "overview" | "referrers" | "rules" | "listing" | "providers" | "admins";
 
 export interface AdminStat {
   value: string;
