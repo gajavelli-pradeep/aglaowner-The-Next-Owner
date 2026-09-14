@@ -40,6 +40,9 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
         <div className="mb-[22px]">
           <label className="mb-2 block text-[13px] font-semibold">Mobile number</label>
           <div className="flex gap-2.5">
+            <span className="flex w-[58px] shrink-0 items-center justify-center rounded border border-line bg-paper-2 px-2 py-[11px] text-sm text-ink-soft">
+              +91
+            </span>
             <input
               type="tel"
               value={mobile}
@@ -47,7 +50,8 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
                 setMobile(e.target.value);
                 setMobileError(false);
               }}
-              placeholder="+91 98xxxxxxx1"
+              placeholder="98xxxxxxx1"
+              maxLength={10}
               className="flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
             />
             <button type="button" onClick={handleSend} className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper">
