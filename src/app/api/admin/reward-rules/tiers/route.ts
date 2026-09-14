@@ -32,13 +32,12 @@ export async function POST(request: NextRequest) {
   if (!rows) return NextResponse.json({ error: "Every threshold and voucher amount must be a whole number greater than zero." }, { status: 400 });
 
   const supabase = createServiceRoleClient();
-  const { error: deleteError } = await supabase.from("reward_tiers").delete().gte("id", 0);
-  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
-
-  const { error: insertError } = await supabase
-    .from("reward_tiers")
-    .insert(rows.map((r) => ({ credits_threshold: r.credits, voucher_amount_paise: r.amount * 100 })));
-  if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
+  // A single RPC call is one transaction, so the delete+insert can't leave the table
+  // empty on a partial failure the way two separate calls could.
+  const { error } = await supabase.rpc("replace_reward_tiers", {
+    p_rows: rows.map((r) => ({ credits_threshold: r.credits, voucher_amount_paise: r.amount * 100 })),
+  });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   revalidatePath("/referral");
   return NextResponse.json({ ok: true });

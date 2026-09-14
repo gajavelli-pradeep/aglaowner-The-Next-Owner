@@ -69,7 +69,7 @@ export default async function AdminPage() {
   const promotion: AdminPromotion = {
     active: promo?.active ?? false,
     mode: (promo?.mode as AdminPromotion["mode"]) ?? "flat",
-    flatAmount: promo?.flat_amount_paise ? Math.round(promo.flat_amount_paise / 100) : 300,
+    flatAmount: promo?.flat_amount_paise != null ? Math.round(promo.flat_amount_paise / 100) : 300,
     multiplier: promo?.multiplier ?? 2,
     startsAt: promo?.starts_at ? promo.starts_at.slice(0, 10) : "",
     endsAt: promo?.ends_at ? promo.ends_at.slice(0, 10) : "",
