@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getCreditRules, getRewardTierSeeds } from "@/lib/data/referral";
-import type { PromoMode } from "@/types/admin";
+import type { AdminCreditRule, AdminRewardTier, AdminPromotion, PromoMode } from "@/types/admin";
 
 const PROMO_OPTIONS: { mode: PromoMode; title: string; desc: string }[] = [
   {
@@ -22,18 +21,103 @@ const PROMO_OPTIONS: { mode: PromoMode; title: string; desc: string }[] = [
   },
 ];
 
-/** #sec-rules — editable credit table, voucher milestones, and the promo-override toggle group. */
-export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void }) {
-  const [credits, setCredits] = useState(() => getCreditRules().map((r) => ({ ...r, value: r.credits.toLocaleString("en-IN") })));
+type OnToast = (msg: string, variant?: "default" | "error") => void;
+
+/** #sec-rules — editable credit table, voucher milestones, and the promo-override toggle group, all backed by the real credit_rules / reward_tiers / promotions tables. */
+export function RewardRulesSection({
+  onToast,
+  initialCreditRules,
+  initialRewardTiers,
+  initialPromotion,
+}: {
+  onToast: OnToast;
+  initialCreditRules: AdminCreditRule[];
+  initialRewardTiers: AdminRewardTier[];
+  initialPromotion: AdminPromotion;
+}) {
+  const [credits, setCredits] = useState(() => initialCreditRules.map((r) => ({ ...r, value: String(r.credits) })));
+  const [savingCredits, setSavingCredits] = useState(false);
+
   const [milestones, setMilestones] = useState(() =>
-    getRewardTierSeeds().map((t) => ({ threshold: t.credits.toLocaleString("en-IN"), amount: t.amount.toLocaleString("en-IN") }))
+    initialRewardTiers.map((t) => ({ id: t.id, threshold: String(t.credits), amount: String(t.amount) }))
   );
-  const [promoOn, setPromoOn] = useState(true);
-  const [promoMode, setPromoMode] = useState<PromoMode>("flat");
-  const [flatAmount, setFlatAmount] = useState("₹300");
-  const [multiplier, setMultiplier] = useState("2x");
-  const [startDate, setStartDate] = useState("01 Jul 2026");
-  const [endDate, setEndDate] = useState("31 Dec 2026");
+  const [savingMilestones, setSavingMilestones] = useState(false);
+
+  const [promoOn, setPromoOn] = useState(initialPromotion.active);
+  const [promoMode, setPromoMode] = useState<PromoMode>(initialPromotion.mode);
+  const [flatAmount, setFlatAmount] = useState(String(initialPromotion.flatAmount));
+  const [multiplier, setMultiplier] = useState(String(initialPromotion.multiplier));
+  const [startDate, setStartDate] = useState(initialPromotion.startsAt);
+  const [endDate, setEndDate] = useState(initialPromotion.endsAt);
+  const [savingPromo, setSavingPromo] = useState(false);
+
+  async function saveCredits() {
+    const rows = credits.map((r) => ({ code: r.code, credits: Number(r.value) }));
+    if (rows.some((r) => !Number.isInteger(r.credits) || r.credits <= 0)) {
+      onToast("Every credit value must be a whole number greater than zero.", "error");
+      return;
+    }
+    setSavingCredits(true);
+    const res = await fetch("/api/admin/reward-rules/credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rows }),
+    });
+    setSavingCredits(false);
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: "Could not save. Try again." }));
+      onToast(error, "error");
+      return;
+    }
+    onToast("Credit values saved — live on the referral page now");
+  }
+
+  async function saveMilestones() {
+    const rows = milestones.map((m) => ({ credits: Number(m.threshold), amount: Number(m.amount) }));
+    if (rows.some((r) => !Number.isInteger(r.credits) || r.credits <= 0 || !Number.isInteger(r.amount) || r.amount <= 0)) {
+      onToast("Every threshold and voucher amount must be a whole number greater than zero.", "error");
+      return;
+    }
+    setSavingMilestones(true);
+    const res = await fetch("/api/admin/reward-rules/tiers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rows }),
+    });
+    setSavingMilestones(false);
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: "Could not save. Try again." }));
+      onToast(error, "error");
+      return;
+    }
+    onToast("Voucher milestones saved — live on the referral page now");
+  }
+
+  async function savePromotion() {
+    const flat = Number(flatAmount);
+    const mult = Number(multiplier);
+    if (!Number.isInteger(flat) || flat <= 0) {
+      onToast("Flat voucher amount must be a whole number greater than zero.", "error");
+      return;
+    }
+    if (!(mult > 0)) {
+      onToast("Multiplier must be a number greater than zero.", "error");
+      return;
+    }
+    setSavingPromo(true);
+    const res = await fetch("/api/admin/reward-rules/promotion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: promoOn, mode: promoMode, flatAmount: flat, multiplier: mult, startsAt: startDate, endsAt: endDate }),
+    });
+    setSavingPromo(false);
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: "Could not save. Try again." }));
+      onToast(error, "error");
+      return;
+    }
+    onToast("Promotion settings saved");
+  }
 
   return (
     <div>
@@ -59,15 +143,14 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
             </thead>
             <tbody>
               {credits.map((rule, i) => (
-                <tr key={rule.label}>
+                <tr key={rule.code}>
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">{rule.label}</td>
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={rule.value}
-                      onChange={(e) =>
-                        setCredits((prev) => prev.map((r, idx) => (idx === i ? { ...r, value: e.target.value } : r)))
-                      }
+                      onChange={(e) => setCredits((prev) => prev.map((r, idx) => (idx === i ? { ...r, value: e.target.value } : r)))}
                       className="w-[90px] rounded border border-line bg-paper-2 px-[9px] py-[7px] font-mono text-[13px] text-ink"
                     />
                   </td>
@@ -77,10 +160,11 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
           </table>
         </div>
         <button
-          className="mt-3.5 rounded-[5px] bg-ink px-[18px] py-[9px] text-[13px] font-semibold text-paper hover:bg-[#3a4235]"
-          onClick={() => onToast("Credit values saved")}
+          disabled={savingCredits}
+          className="mt-3.5 rounded-[5px] bg-ink px-[18px] py-[9px] text-[13px] font-semibold text-paper hover:bg-[#3a4235] disabled:opacity-60"
+          onClick={saveCredits}
         >
-          Save credit values
+          {savingCredits ? "Saving…" : "Save credit values"}
         </button>
       </div>
 
@@ -105,6 +189,7 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={m.threshold}
                       onChange={(e) => setMilestones((prev) => prev.map((row, idx) => (idx === i ? { ...row, threshold: e.target.value } : row)))}
                       className="w-[90px] rounded border border-line bg-paper-2 px-[9px] py-[7px] font-mono text-[13px] text-ink"
@@ -113,6 +198,7 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={m.amount}
                       onChange={(e) => setMilestones((prev) => prev.map((row, idx) => (idx === i ? { ...row, amount: e.target.value } : row)))}
                       className="w-[90px] rounded border border-line bg-paper-2 px-[9px] py-[7px] font-mono text-[13px] text-ink"
@@ -124,10 +210,11 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
           </table>
         </div>
         <button
-          className="mt-3.5 rounded-[5px] bg-ink px-[18px] py-[9px] text-[13px] font-semibold text-paper hover:bg-[#3a4235]"
-          onClick={() => onToast("Voucher milestones saved")}
+          disabled={savingMilestones}
+          className="mt-3.5 rounded-[5px] bg-ink px-[18px] py-[9px] text-[13px] font-semibold text-paper hover:bg-[#3a4235] disabled:opacity-60"
+          onClick={saveMilestones}
         >
-          Save milestones
+          {savingMilestones ? "Saving…" : "Save milestones"}
         </button>
       </div>
 
@@ -158,9 +245,10 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
             </div>
             <div className="mb-3.5 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">Flat voucher amount</label>
+                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">Flat voucher amount (₹)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={flatAmount}
                   onChange={(e) => setFlatAmount(e.target.value)}
                   className="w-full rounded-[5px] border border-line bg-paper-2 px-[11px] py-[9px] text-[13px] text-ink"
@@ -170,6 +258,7 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
                 <label className="mb-1.5 block text-xs font-semibold text-ink-soft">Multiplier (if selected)</label>
                 <input
                   type="text"
+                  inputMode="decimal"
                   value={multiplier}
                   onChange={(e) => setMultiplier(e.target.value)}
                   className="w-full rounded-[5px] border border-line bg-paper-2 px-[11px] py-[9px] text-[13px] text-ink"
@@ -180,7 +269,7 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-ink-soft">Promotion start date</label>
                 <input
-                  type="text"
+                  type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   className="w-full rounded-[5px] border border-line bg-paper-2 px-[11px] py-[9px] text-[13px] text-ink"
@@ -189,7 +278,7 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-ink-soft">Promotion end date</label>
                 <input
-                  type="text"
+                  type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   className="w-full rounded-[5px] border border-line bg-paper-2 px-[11px] py-[9px] text-[13px] text-ink"
@@ -197,10 +286,11 @@ export function RewardRulesSection({ onToast }: { onToast: (msg: string) => void
               </div>
             </div>
             <button
-              className="rounded-[5px] bg-ink px-[18px] py-[9px] text-[13px] font-semibold text-paper hover:bg-[#3a4235]"
-              onClick={() => onToast("Promotion settings saved")}
+              disabled={savingPromo}
+              className="rounded-[5px] bg-ink px-[18px] py-[9px] text-[13px] font-semibold text-paper hover:bg-[#3a4235] disabled:opacity-60"
+              onClick={savePromotion}
             >
-              Save promotion settings
+              {savingPromo ? "Saving…" : "Save promotion settings"}
             </button>
           </div>
         )}

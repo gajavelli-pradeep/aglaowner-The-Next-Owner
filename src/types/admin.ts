@@ -48,3 +48,24 @@ export interface VoucherProviderConnect {
 }
 
 export type PromoMode = "flat" | "multiplier" | "free-listing";
+
+export interface AdminCreditRule {
+  code: string;
+  label: string;
+  credits: number;
+}
+
+export interface AdminRewardTier {
+  id: number | null;
+  credits: number;
+  amount: number;
+}
+
+export interface AdminPromotion {
+  active: boolean;
+  mode: PromoMode;
+  flatAmount: number;
+  multiplier: number;
+  startsAt: string; // "" or "YYYY-MM-DD"
+  endsAt: string; // "" or "YYYY-MM-DD"
+}
