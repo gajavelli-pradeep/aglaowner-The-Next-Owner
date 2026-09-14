@@ -9,10 +9,10 @@ import { ListingSettingsSection } from "@/components/admin/ListingSettingsSectio
 import { ProvidersSection } from "@/components/admin/ProvidersSection";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/lib/useToast";
-import type { AdminSection } from "@/types/admin";
+import type { AdminSection, ListingTypeSetting } from "@/types/admin";
 
 /** Client orchestrator for /admin — sidebar click drives section state (no nested routes), matching the AglaownerApp/ReferralApp convention. */
-export function AdminApp({ adminEmail }: { adminEmail: string }) {
+export function AdminApp({ adminEmail, listingTypeSettings }: { adminEmail: string; listingTypeSettings: ListingTypeSetting[] }) {
   const [section, setSection] = useState<AdminSection>("overview");
   const { message, show, showToast } = useToast();
 
@@ -23,7 +23,7 @@ export function AdminApp({ adminEmail }: { adminEmail: string }) {
         {section === "overview" && <OverviewSection onNavigate={setSection} />}
         {section === "referrers" && <ReferrersSection onToast={showToast} />}
         {section === "rules" && <RewardRulesSection onToast={showToast} />}
-        {section === "listing" && <ListingSettingsSection onToast={showToast} />}
+        {section === "listing" && <ListingSettingsSection onToast={showToast} initialSettings={listingTypeSettings} />}
         {section === "providers" && <ProvidersSection onToast={showToast} />}
       </main>
       <Toast message={message} show={show} />
