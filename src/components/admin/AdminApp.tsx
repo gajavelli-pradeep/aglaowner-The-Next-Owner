@@ -12,13 +12,13 @@ import { useToast } from "@/lib/useToast";
 import type { AdminSection } from "@/types/admin";
 
 /** Client orchestrator for /admin — sidebar click drives section state (no nested routes), matching the AglaownerApp/ReferralApp convention. */
-export function AdminApp() {
+export function AdminApp({ adminEmail }: { adminEmail: string }) {
   const [section, setSection] = useState<AdminSection>("overview");
   const { message, show, showToast } = useToast();
 
   return (
     <div className="flex min-h-screen">
-      <AdminSidebar active={section} onNavigate={setSection} />
+      <AdminSidebar active={section} onNavigate={setSection} adminEmail={adminEmail} />
       <main className="max-w-[1180px] flex-1 px-10 py-8">
         {section === "overview" && <OverviewSection onNavigate={setSection} />}
         {section === "referrers" && <ReferrersSection onToast={showToast} />}

@@ -13,7 +13,9 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
-    if (!error) redirect(next);
+    // A password-recovery link must land on the "set new password" screen, never
+    // wherever `next` happened to point (e.g. a stale deep link from before the reset).
+    if (!error) redirect(type === "recovery" ? "/admin/reset-password" : next);
   }
 
   redirect("/admin/login?error=invalid_link");
