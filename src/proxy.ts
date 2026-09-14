@@ -13,8 +13,8 @@ import { updateSession } from "@/lib/supabase/proxy-session";
  * confirmed by a live dev-server check before this was scoped down.
  */
 export async function proxy(request: NextRequest) {
-  const isLoginRoute = request.nextUrl.pathname === "/admin/login";
-  if (isLoginRoute) return NextResponse.next();
+  const isPublicAuthRoute = ["/admin/login", "/admin/forgot-password"].includes(request.nextUrl.pathname);
+  if (isPublicAuthRoute) return NextResponse.next();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
     // Fail closed: no Supabase project configured yet means /admin stays locked, not open.

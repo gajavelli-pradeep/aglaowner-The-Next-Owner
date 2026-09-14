@@ -2,6 +2,7 @@
 
 import { IconRocket } from "@tabler/icons-react";
 import { getOverviewStats, getOverviewActivity } from "@/lib/data/admin";
+import { InviteAdminCard } from "@/components/admin/InviteAdminCard";
 import type { AdminSection } from "@/types/admin";
 
 /** #sec-overview — stat grid, launch-promo banner, recent referral activity table. */
@@ -39,6 +40,8 @@ export function OverviewSection({ onNavigate }: { onNavigate: (section: AdminSec
           </div>
         ))}
       </div>
+
+      <InviteAdminCard />
 
       <div className="mb-5 rounded-lg border border-line bg-paper p-[22px]">
         <h3 className="mb-1 text-[14.5px] font-semibold">Recent referral activity</h3>
