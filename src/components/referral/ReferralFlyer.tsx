@@ -2,9 +2,10 @@
 
 import { useRef } from "react";
 import { IconBrandWhatsapp, IconDownload, IconCopy } from "@tabler/icons-react";
+import type { ToastVariant } from "@/lib/useToast";
 
 /** .rflyer + .share-row — the referral-code flyer (distinct square design from the listing flyer) with real share/download/copy actions. */
-export function ReferralFlyer({ code, onToast }: { code: string; onToast: (msg: string) => void }) {
+export function ReferralFlyer({ code, onToast }: { code: string; onToast: (msg: string, variant?: ToastVariant) => void }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const shareText = `Heard about aglaowner from someone and tried it myself — genuinely useful when selling a business, equipment, a lease, or excess stock. Use my code ${code} when you list: https://aglaowner.in`;
 
@@ -23,7 +24,7 @@ export function ReferralFlyer({ code, onToast }: { code: string; onToast: (msg: 
       link.click();
       onToast("Flyer downloaded — ready to post");
     } catch {
-      onToast("Could not generate the flyer — try again");
+      onToast("Could not generate the flyer — try again", "error");
     }
   }
 

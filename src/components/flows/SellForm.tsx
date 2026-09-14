@@ -9,6 +9,7 @@ import { TextField, SelectField, TextAreaField, RadioRowButton, OtpStatus, RefEr
 import { SubmitButton } from "@/components/ui/Buttons";
 import { iconFor } from "@/lib/tablerIconMap";
 import { getDemoReferrer } from "@/lib/data/listings";
+import { isValidMobile } from "@/lib/validation";
 import type { ListingType } from "@/types/listing";
 
 const INCLUDE_OPTIONS = ["Furniture", "Kitchen equipment", "Fixtures & fittings", "Signage", "AC / electricals"];
@@ -52,6 +53,7 @@ export function SellForm({
   const [mobile, setMobile] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [refError, setRefError] = useState(false);
+  const [mobileError, setMobileError] = useState(false);
   const [debtOption, setDebtOption] = useState<"no" | "yes">("no");
   const [addEquip, setAddEquip] = useState(false);
   const [includeSelected, setIncludeSelected] = useState<string[]>([]);
@@ -67,6 +69,10 @@ export function SellForm({
   }
 
   function handleSubmit() {
+    if (showMobile && !otpSent) {
+      setMobileError(true);
+      return;
+    }
     const mobileClean = mobile.replace(/\s+/g, "");
     const code = referralCode.trim().toUpperCase();
     if (code && mobileClean === demoReferrer.mobile && code === demoReferrer.code) {
@@ -243,14 +249,31 @@ export function SellForm({
               <input
                 type="tel"
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                onChange={(e) => {
+                  setMobile(e.target.value);
+                  setMobileError(false);
+                }}
                 placeholder="+91 98xxxxxxx1"
                 className="flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
               />
-              <button type="button" onClick={() => setOtpSent(true)} className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isValidMobile(mobile)) {
+                    setMobileError(true);
+                    return;
+                  }
+                  setMobileError(false);
+                  setOtpSent(true);
+                }}
+                className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper"
+              >
                 Send OTP
               </button>
             </div>
+            <RefError show={mobileError}>
+              <IconAlertCircle size={14} /> {otpSent ? "Verify your mobile number before continuing." : "Enter a valid 10-digit mobile number."}
+            </RefError>
             <OtpStatus show={otpSent} />
           </div>
         )}

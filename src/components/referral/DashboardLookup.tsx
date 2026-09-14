@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { IconAlertCircle } from "@tabler/icons-react";
 import { OtpField } from "@/components/referral/OtpField";
+import { RefError } from "@/components/ui/Misc";
 import { SubmitButton } from "@/components/ui/Buttons";
 
 /** dashboard-lookup screen — mobile OTP gate before viewing the dashboard. */
 export function DashboardLookup({ onSubmit }: { onSubmit: () => void }) {
   const [verified, setVerified] = useState(false);
+  const [notVerifiedError, setNotVerifiedError] = useState(false);
 
   return (
     <div className="px-6">
@@ -18,10 +21,18 @@ export function DashboardLookup({ onSubmit }: { onSubmit: () => void }) {
         className="mx-auto my-5 max-w-[460px] rounded-lg border border-line bg-paper p-7"
         onSubmit={(e) => {
           e.preventDefault();
+          if (!verified) {
+            setNotVerifiedError(true);
+            return;
+          }
+          setNotVerifiedError(false);
           onSubmit();
         }}
       >
         <OtpField verified={verified} onSend={() => setVerified(true)} />
+        <RefError show={notVerifiedError}>
+          <IconAlertCircle size={14} /> Verify your mobile number first.
+        </RefError>
         <SubmitButton type="submit" className="mt-5 w-full">
           View my dashboard
         </SubmitButton>

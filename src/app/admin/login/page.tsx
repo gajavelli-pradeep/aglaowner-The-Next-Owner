@@ -6,11 +6,16 @@ import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/ui/Buttons";
 import { safeNextPath } from "@/lib/safe-redirect";
 
+const LINK_ERROR_MESSAGE = "That sign-in link is invalid or has expired -- request a new one below.";
+
 function LoginForm() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const next = safeNextPath(useSearchParams().get("next"));
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "invalid_link" ? LINK_ERROR_MESSAGE : null
+  );
+  const next = safeNextPath(searchParams.get("next"));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

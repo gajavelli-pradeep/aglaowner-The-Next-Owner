@@ -14,7 +14,7 @@ import type { ReferralScreen } from "@/components/referral/referralScreens";
 /** Client orchestrator for /referral — mirrors AglaownerApp's history-stack screen router. */
 export function ReferralApp() {
   const [history, setHistory] = useState<ReferralScreen[]>(["home"]);
-  const { message, show, showToast } = useToast();
+  const { message, variant, show, showToast } = useToast();
 
   const screen = history[history.length - 1];
   const isFlow = screen !== "home";
@@ -46,7 +46,7 @@ export function ReferralApp() {
         {screen === "dashboard" && <Dashboard onToast={showToast} />}
       </main>
 
-      <Toast message={message} show={show} />
+      <Toast message={message} show={show} variant={variant} />
     </>
   );
 }

@@ -1,12 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { IconAlertCircle } from "@tabler/icons-react";
 import { SubmitButton } from "@/components/ui/Buttons";
-import { OtpStatus } from "@/components/ui/Misc";
+import { OtpStatus, RefError } from "@/components/ui/Misc";
+import { isValidMobile } from "@/lib/validation";
 
 export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
   const [mobile, setMobile] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [mobileError, setMobileError] = useState(false);
+  const [otpRequiredError, setOtpRequiredError] = useState(false);
+
+  function handleSend() {
+    if (!isValidMobile(mobile)) {
+      setMobileError(true);
+      return;
+    }
+    setMobileError(false);
+    setOtpSent(true);
+  }
+
+  function handleContinue() {
+    if (!otpSent) {
+      setOtpRequiredError(true);
+      return;
+    }
+    setOtpRequiredError(false);
+    onContinue();
+  }
 
   return (
     <div className="mx-auto max-w-[1080px] px-6">
@@ -21,14 +43,20 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
             <input
               type="tel"
               value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
+              onChange={(e) => {
+                setMobile(e.target.value);
+                setMobileError(false);
+              }}
               placeholder="+91 98xxxxxxx1"
               className="flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
             />
-            <button type="button" onClick={() => setOtpSent(true)} className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper">
+            <button type="button" onClick={handleSend} className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper">
               Send OTP
             </button>
           </div>
+          <RefError show={mobileError}>
+            <IconAlertCircle size={14} /> Enter a valid 10-digit mobile number.
+          </RefError>
           <OtpStatus show={otpSent} />
         </div>
         {otpSent && (
@@ -37,7 +65,10 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
             <input type="text" maxLength={4} placeholder="4-digit code" className="w-full rounded border border-line bg-paper-2 px-3 py-[11px] text-sm" />
           </div>
         )}
-        <SubmitButton onClick={onContinue} className="w-full">
+        <RefError show={otpRequiredError}>
+          <IconAlertCircle size={14} /> Verify your mobile number first.
+        </RefError>
+        <SubmitButton onClick={handleContinue} className="w-full">
           View my listings
         </SubmitButton>
       </div>

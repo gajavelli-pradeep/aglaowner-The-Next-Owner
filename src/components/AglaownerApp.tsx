@@ -35,7 +35,7 @@ export function AglaownerApp({ pricingPlans }: { pricingPlans: PricingPlan[] }) 
   const [editingListing, setEditingListing] = useState<MyListing | null>(null);
   const [addedEquipOnSell, setAddedEquipOnSell] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const { message, show, showToast } = useToast();
+  const { message, variant, show, showToast } = useToast();
 
   const screen = history[history.length - 1];
   const isFlow = screen !== "home";
@@ -401,7 +401,7 @@ export function AglaownerApp({ pricingPlans }: { pricingPlans: PricingPlan[] }) 
       <Footer onCategory={browseCategory} onAllCategories={browseAllCategories} />
 
       <VerifyModal open={modalOpen} onClose={() => setModalOpen(false)} />
-      <Toast message={message} show={show} />
+      <Toast message={message} show={show} variant={variant} />
     </>
   );
 }

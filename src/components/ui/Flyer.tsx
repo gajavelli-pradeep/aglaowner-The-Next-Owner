@@ -6,9 +6,10 @@ import { useRef } from "react";
 import { IconMapPin, IconPhoto, IconBrandWhatsapp, IconDownload, IconLink } from "@tabler/icons-react";
 import { iconFor } from "@/lib/tablerIconMap";
 import type { ConfirmFlyerData } from "@/types/listing";
+import type { ToastVariant } from "@/lib/useToast";
 
 /** .flyer-card + .share-row — shareable listing flyer with real WhatsApp/download/link-share actions. */
-export function Flyer({ data, onToast }: { data: ConfirmFlyerData; onToast: (msg: string) => void }) {
+export function Flyer({ data, onToast }: { data: ConfirmFlyerData; onToast: (msg: string, variant?: ToastVariant) => void }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const Icon = iconFor(data.icon);
   const shareUrl = `https://aglaowner.in/l/${data.ref}`;
@@ -29,7 +30,7 @@ export function Flyer({ data, onToast }: { data: ConfirmFlyerData; onToast: (msg
       link.click();
       onToast("Flyer downloaded — ready to post");
     } catch {
-      onToast("Could not generate the flyer — try again");
+      onToast("Could not generate the flyer — try again", "error");
     }
   }
 
