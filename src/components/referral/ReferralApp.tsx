@@ -10,9 +10,10 @@ import { Dashboard } from "@/components/referral/Dashboard";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/lib/useToast";
 import type { ReferralScreen } from "@/components/referral/referralScreens";
+import type { CreditRule, RewardTierSeed } from "@/types/referral";
 
 /** Client orchestrator for /referral — mirrors AglaownerApp's history-stack screen router. */
-export function ReferralApp() {
+export function ReferralApp({ creditRules, rewardTiers }: { creditRules: CreditRule[]; rewardTiers: RewardTierSeed[] }) {
   const [history, setHistory] = useState<ReferralScreen[]>(["home"]);
   const { message, variant, show, showToast } = useToast();
 
@@ -39,7 +40,9 @@ export function ReferralApp() {
       <ReferralHeader isFlow={isFlow} onLogoClick={goHome} onDashboard={() => goTo("dashboard-lookup")} onGetCode={() => goTo("get-code-form")} onBack={goBack} />
 
       <main className="flex-1">
-        {screen === "home" && <ReferralHomeScreen onGetCode={() => goTo("get-code-form")} onDashboard={() => goTo("dashboard-lookup")} />}
+        {screen === "home" && (
+          <ReferralHomeScreen onGetCode={() => goTo("get-code-form")} onDashboard={() => goTo("dashboard-lookup")} creditRules={creditRules} rewardTiers={rewardTiers} />
+        )}
         {screen === "get-code-form" && <GetCodeForm onSubmit={() => goTo("code-confirm")} />}
         {screen === "code-confirm" && <CodeConfirm onToast={showToast} onDashboard={() => goTo("dashboard")} />}
         {screen === "dashboard-lookup" && <DashboardLookup onSubmit={() => goTo("dashboard")} />}

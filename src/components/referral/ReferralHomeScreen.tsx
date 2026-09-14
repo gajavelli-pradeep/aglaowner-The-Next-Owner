@@ -3,15 +3,26 @@
 import { IconBadge, IconLayoutDashboard, IconCoins, IconShieldCheck, IconRefresh } from "@tabler/icons-react";
 import Link from "next/link";
 import { AccordionItem } from "@/components/ui/Accordion";
-import { getReferralSteps, getRewardTierSeeds, getCreditRules, getReferralFaq } from "@/lib/data/referral";
+import { getReferralSteps, getReferralFaq } from "@/lib/data/referral";
+import type { CreditRule, RewardTierSeed } from "@/types/referral";
 
 const WHO_CHIPS = ["CAs & tax consultants", "Trade & market associations", "Local business networks", "Anyone who hears about closures first"];
 
 /** Referral landing screen — hero, how-it-works, rewards + credit table, faq, cta band, footer. */
-export function ReferralHomeScreen({ onGetCode, onDashboard }: { onGetCode: () => void; onDashboard: () => void }) {
+export function ReferralHomeScreen({
+  onGetCode,
+  onDashboard,
+  creditRules,
+  rewardTiers,
+}: {
+  onGetCode: () => void;
+  onDashboard: () => void;
+  creditRules: CreditRule[];
+  rewardTiers: RewardTierSeed[];
+}) {
   const steps = getReferralSteps();
-  const tiers = getRewardTierSeeds();
-  const rules = getCreditRules();
+  const tiers = rewardTiers;
+  const rules = creditRules;
   const faq = getReferralFaq();
 
   return (
