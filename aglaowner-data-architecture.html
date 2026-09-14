@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<title>Data Layer Architecture</title>
+<style>
+  :root {
+    --paper: #F6F3EA;
+    --paper-2: #EEEADB;
+    --paper-3: #E5E0CE;
+    --ink: #22291F;
+    --ink-soft: #565F4F;
+    --line: #C9C2AC;
+    --line-soft: #DAD5C4;
+    --oxide: #B3402A;
+    --oxide-soft: #E7C9BF;
+    --stamp: #3F6B4A;
+    --stamp-soft: #CBDBC9;
+    --navy: #2A4B7C;
+    --navy-soft: #C6D2E4;
+    --code-bg: #EDE8D8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1B1D16;
+      --paper-2: #23261D;
+      --paper-3: #2C2F24;
+      --ink: #EDE9DA;
+      --ink-soft: #A7A791;
+      --line: #43473686;
+      --line-soft: #363A2B;
+      --oxide: #E08469;
+      --oxide-soft: #4A2A22;
+      --stamp: #8FC79A;
+      --stamp-soft: #253B2A;
+      --navy: #8FAEDE;
+      --navy-soft: #22304A;
+      --code-bg: #23261D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1B1D16;
+    --paper-2: #23261D;
+    --paper-3: #2C2F24;
+    --ink: #EDE9DA;
+    --ink-soft: #A7A791;
+    --line: #43473686;
+    --line-soft: #363A2B;
+    --oxide: #E08469;
+    --oxide-soft: #4A2A22;
+    --stamp: #8FC79A;
+    --stamp-soft: #253B2A;
+    --navy: #8FAEDE;
+    --navy-soft: #22304A;
+    --code-bg: #23261D;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    font-size: 15.5px;
+  }
+  ::selection { background: var(--oxide-soft); }
+
+  h1, h2, h3, h4 { font-family: 'Archivo Black', system-ui, sans-serif; font-weight: 400; text-wrap: balance; letter-spacing: -0.01em; }
+  code, .mono, .k, th, td.num, .pill, .tag { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  a { color: var(--oxide); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  header.masthead {
+    border-bottom: 1px solid var(--line);
+    padding: 40px 0 28px;
+    background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  }
+  header.masthead .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--oxide);
+    margin: 0 0 10px;
+  }
+  header.masthead h1 { font-size: clamp(28px, 4vw, 42px); margin: 0 0 10px; }
+  header.masthead .sub { max-width: 62ch; color: var(--ink-soft); font-size: 16px; margin: 0 0 20px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .meta-row .pill {
+    font-size: 11.5px; padding: 5px 10px; border-radius: 20px;
+    border: 1px solid var(--line); color: var(--ink-soft); background: var(--paper);
+  }
+  .meta-row .pill b { color: var(--ink); font-weight: 600; font-family: inherit; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 5;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.toc .wrap { display: flex; gap: 4px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; scrollbar-width: none; }
+  nav.toc .wrap::-webkit-scrollbar { display: none; }
+  nav.toc a {
+    flex: none; font-size: 12.5px; font-weight: 600; color: var(--ink-soft);
+    text-decoration: none; padding: 7px 12px; border-radius: 6px; white-space: nowrap;
+  }
+  nav.toc a:hover { color: var(--ink); background: var(--paper-2); }
+
+  main { padding: 8px 0 90px; }
+  section { padding: 46px 0; border-bottom: 1px solid var(--line-soft); scroll-margin-top: 64px; }
+  section:last-child { border-bottom: none; }
+  section > .num { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--oxide); letter-spacing: 0.08em; margin: 0 0 6px; }
+  section > h2 { font-size: 26px; margin: 0 0 10px; }
+  section > .lede { color: var(--ink-soft); max-width: 68ch; margin: 0 0 28px; font-size: 15px; }
+
+  .figure-shell { border: 1px solid var(--line); border-radius: 10px; background: var(--paper-2); padding: 20px; overflow-x: auto; }
+  figure { margin: 0; }
+  figcaption { margin-top: 14px; font-size: 13px; color: var(--ink-soft); max-width: 72ch; }
+  figcaption b { color: var(--ink); }
+
+  .mermaid-shell { border: 1px solid var(--line); border-radius: 10px; background: var(--paper-2); padding: 24px; overflow-x: auto; }
+  .mermaid-shell .mermaid { padding: 4px 4px 4px 0; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.3px; }
+  th { text-align: left; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .schema-card { border: 1px solid var(--line); border-radius: 10px; background: var(--paper-2); overflow: hidden; margin-bottom: 18px; }
+  .schema-card .head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 13px 16px; background: var(--paper-3); border-bottom: 1px solid var(--line);
+  }
+  .schema-card .head .name { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14.5px; }
+  .schema-card .head .desc { font-size: 12.5px; color: var(--ink-soft); text-align: right; }
+  main table { display: block; overflow-x: auto; max-width: 100%; }
+  .schema-card table td:first-child { font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+  .badge { display: inline-block; font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: 0.03em; margin-left: 6px; vertical-align: 1px; }
+  .badge.pk { background: var(--oxide-soft); color: var(--oxide); }
+  .badge.fk { background: var(--navy-soft); color: var(--navy); }
+  .badge.uq { background: var(--stamp-soft); color: var(--stamp); }
+
+  .domain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 4px 32px; }
+
+  .rls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 4px; }
+  .rls-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--paper-2); }
+  .rls-card .who { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .rls-card .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .rls-card h4 { font-size: 14.5px; margin: 0; font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; }
+  .rls-card p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .rls-card code { font-size: 11.5px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; overflow-x: auto; font-size: 12.6px; line-height: 1.65;
+  }
+  pre code { font-family: inherit; }
+  .comment { color: var(--ink-soft); }
+
+  .callout {
+    border-left: 3px solid var(--oxide); background: var(--oxide-soft);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13.5px; margin: 18px 0;
+  }
+  .callout.green { border-color: var(--stamp); background: var(--stamp-soft); }
+  .callout b { display: block; margin-bottom: 3px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .steps { list-style: none; counter-reset: step; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+  .steps > li { position: relative; padding-left: 40px; font-size: 14px; }
+  .steps > li::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--oxide-soft); color: var(--oxide); font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+  .steps > li b { display: block; margin-bottom: 6px; }
+  .steps table, .steps pre { margin-top: 10px; }
+
+  .provider-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .provider-list details {
+    border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); overflow: hidden;
+  }
+  .provider-list summary {
+    cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 13.5px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    list-style: none;
+  }
+  .provider-list summary::-webkit-details-marker { display: none; }
+  .provider-list summary::after {
+    content: "+"; font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: var(--ink-soft);
+    transition: transform 0.15s;
+  }
+  .provider-list details[open] summary::after { content: "\2212"; }
+  .provider-list summary .verdict { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: auto; margin-right: 8px; }
+  .provider-list summary .verdict.recommended { background: var(--stamp-soft); color: var(--stamp); }
+  .provider-list summary .verdict.priced { background: var(--oxide-soft); color: var(--oxide); }
+  .provider-list summary .verdict.unverified { background: var(--paper-3); color: var(--ink-soft); border: 1px dashed var(--line); }
+  .provider-list .body { padding: 0 16px 14px; font-size: 13px; color: var(--ink-soft); }
+  .provider-list .body table { margin-top: 8px; }
+  .provider-list .body p { margin: 6px 0; }
+
+  .env-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+  .env-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--paper-2); }
+  .env-card .k { font-size: 12.5px; font-weight: 600; }
+  .env-card .k .scope { font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 6px; }
+  .env-card .scope.pub { background: var(--stamp-soft); color: var(--stamp); }
+  .env-card .scope.srv { background: var(--oxide-soft); color: var(--oxide); }
+  .env-card p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+
+  footer { padding: 30px 0 60px; color: var(--ink-soft); font-size: 12.5px; text-align: center; }
+
+  svg text { fill: currentColor; font-family: 'IBM Plex Mono', monospace; }
+  .accent-oxide { color: var(--oxide); }
+  .accent-stamp { color: var(--stamp); }
+  .accent-navy { color: var(--navy); }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">aglaowner &middot; data layer architecture</p>
+    <h1>Where every screen's data will live</h1>
+    <p class="sub">A database-first map of the marketplace, referral network and admin console: the entities behind today's static <code>src/data/*.ts</code>, how they connect through Supabase, and who is allowed to read or write what. Supabase and Razorpay are connected and verified live &mdash; SMS/OTP, DigiLocker, and voucher payouts are still pending (see section 00).</p>
+    <div class="meta-row">
+      <span class="pill">Status: <b>Supabase + Razorpay live</b></span>
+      <span class="pill">Apps: <b>Marketplace &middot; Referral &middot; Admin</b></span>
+      <span class="pill">Identity: <b>phone OTP via Supabase Auth</b></span>
+      <span class="pill">Tables: <b>14</b></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#pending">Pending &amp; how to unblock</a>
+    <a href="#mindmap">Mindmap</a>
+    <a href="#erd">Entity map</a>
+    <a href="#write-flow">Write flow</a>
+    <a href="#read-flow">Read flow</a>
+    <a href="#schema">Schema</a>
+    <a href="#rls">Access control</a>
+    <a href="#storage">Storage &amp; env</a>
+    <a href="#migration">Wiring it up</a>
+    <a href="#go-live">Connecting real keys</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section id="pending">
+    <p class="num">00</p>
+    <h2>Pending &amp; how to unblock each one</h2>
+    <p class="lede">Five accounts stand between today's code and a fully live product. Supabase unblocks the most (auth, database, pricing); the rest are independent &mdash; get them in any order, whenever they're ready.</p>
+
+    <div class="schema-card">
+      <div class="head"><span class="name">1. Supabase</span><span class="desc">unblocks: database, auth, admin login, pricing</span></div>
+      <table>
+        <tr><th>Get</th><th>Where</th><th>Goes into</th></tr>
+        <tr><td>Project URL</td><td><a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> &rarr; New project &rarr; Project Settings &rarr; API</td><td class="mono">NEXT_PUBLIC_SUPABASE_URL</td></tr>
+        <tr><td>Publishable (anon) key</td><td>same page</td><td class="mono">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</td></tr>
+        <tr><td>Service role key</td><td>same page</td><td class="mono">SUPABASE_SERVICE_ROLE_KEY <span class="badge fk">server-only</span></td></tr>
+      </table>
+      <p style="margin-top:10px; font-size:13px; color:var(--ink-soft);">Full setup order is in <a href="#go-live">section 09, "Connecting real keys"</a> below &mdash; run the migration first, keys second, provision the first admin third.</p>
+    </div>
+
+    <div class="schema-card">
+      <div class="head"><span class="name">2. SMS / OTP provider</span><span class="desc">unblocks: real phone-number verification for sellers</span></div>
+      <table>
+        <tr><th>Get</th><th>Where</th><th>Goes into</th></tr>
+        <tr><td>Account SID + Auth Token (or equivalent API key)</td><td>Pick one: <a href="https://www.twilio.com" target="_blank" rel="noopener">twilio.com</a>, <a href="https://www.vonage.com" target="_blank" rel="noopener">vonage.com</a>, or an India-focused provider like <a href="https://msg91.com" target="_blank" rel="noopener">msg91.com</a></td><td>Not an app env var &mdash; pasted into the <b>Supabase dashboard</b> &rarr; Authentication &rarr; Sign In / Providers &rarr; Phone, once a project exists</td></tr>
+      </table>
+
+      <p style="margin-top:14px; font-size:13px; font-weight:600;">Provider pricing &mdash; none are free/unlimited at real volume. SMS costs money to deliver; no provider absorbs that forever.</p>
+      <div class="provider-list">
+
+        <details>
+          <summary>Twilio Verify <span class="verdict priced">$0.05/verification + SMS</span></summary>
+          <div class="body">
+            <p><b>Verified live</b> against Twilio's own pricing page this session. Free trial, no credit card required, to start building.</p>
+            <p>After the trial: <b>$0.05 per successful verification</b>, on top of the underlying SMS carrier fee (Twilio's example US rate is $0.0083/SMS &mdash; India's rate is different and wasn't listed on the general pricing page; check Twilio's international SMS pricing page directly for the India figure before committing).</p>
+            <p>Priced in USD. Not India-optimized &mdash; a global provider's India rates are usually higher than an India-first provider's.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>MSG91 <span class="verdict recommended">&#8377;0.18&ndash;0.25/OTP</span></summary>
+          <div class="body">
+            <p><b>Verified live</b> against MSG91's India OTP pricing page this session: <b>&#8377;0.25 per OTP</b> at the 5,000-OTP tier, dropping to <b>&#8377;0.18 per OTP</b> at their highest published volume tier (~855,000+ OTPs/month).</p>
+            <p>No free-trial-credit amount was disclosed on the pricing page itself (MSG91 commonly offers some free credits at signup in practice &mdash; confirm the current number after creating an account, don't assume a figure).</p>
+            <p>India-first provider &mdash; likely the cheapest per-OTP option here for an India-only product. Has documented Supabase Auth integration support.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Textlocal <span class="verdict unverified">unverified &mdash; site unreachable</span></summary>
+          <div class="body">
+            <p>Two live-fetch attempts this session both failed (<code>connect ECONNREFUSED</code>) &mdash; their pricing page could not be reached from here. Historically an India-focused, per-SMS-cheap provider, but <b>do not trust that from memory</b> &mdash; check <a href="https://www.textlocal.in/pricing/" target="_blank" rel="noopener">textlocal.in/pricing</a> yourself before committing.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Vonage Verify <span class="verdict unverified">unverified &mdash; blocked (403)</span></summary>
+          <div class="body">
+            <p>Live-fetch attempt this session returned <b>403 Forbidden</b> &mdash; their pricing page blocks automated fetches. Same pricing category as Twilio Verify (managed OTP flow, per-verification fee); check <a href="https://www.vonage.com/communications-apis/verify/pricing/" target="_blank" rel="noopener">vonage.com/communications-apis/verify/pricing</a> directly in a browser.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>MessageBird / Bird <span class="verdict unverified">unverified &mdash; pricing not disclosed on page</span></summary>
+          <div class="body">
+            <p>Live-fetched this session: their general pricing page confirms "free tier, no card required" for <em>email</em>, and states SMS "bills per use at its published rate" &mdash; but doesn't give the actual per-SMS or per-verification number. Check <a href="https://bird.com/pricing/sms" target="_blank" rel="noopener">bird.com/pricing/sms</a> directly for the real figure.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <div class="callout" style="margin-top:14px;">
+        <b>Recommendation for this project</b>
+        aglaowner is India-only (&#8377; pricing, Indian phone numbers, DigiLocker). Twilio/Vonage/MessageBird are global providers whose India rates are typically higher than an India-first provider's. <b>MSG91</b> is the only one with confirmed, published India-specific per-OTP pricing this session (&#8377;0.18&ndash;0.25) and has documented Supabase integration support &mdash; worth checking Textlocal too once its site is reachable, since it's the other India-focused option on this list.
+      </div>
+    </div>
+
+    <div class="schema-card">
+      <div class="head"><span class="name">3. Payment gateway</span><span class="desc">Razorpay connected + webhook live &mdash; unblocks: the client-side checkout trigger on "Pay &amp; go live" (not yet built)</span></div>
+      <table>
+        <tr><th>Get</th><th>Where</th><th>Goes into</th></tr>
+        <tr><td>Key ID + Key Secret, plus a webhook signing secret</td><td>India-focused options: <a href="https://razorpay.com" target="_blank" rel="noopener">razorpay.com</a> or <a href="https://www.cashfree.com" target="_blank" rel="noopener">cashfree.com</a> &mdash; signup requires business KYC, not instant</td><td>Server-only env vars, consumed by <code>POST /api/webhooks/razorpay</code> &mdash; <b>built and verified live this session</b> (see section 03)</td></tr>
+      </table>
+    </div>
+
+    <div class="schema-card">
+      <div class="head"><span class="name">4. DigiLocker</span><span class="desc">unblocks: real buyer identity verification</span></div>
+      <table>
+        <tr><th>Get</th><th>Where</th><th>Goes into</th></tr>
+        <tr><td>Client ID + Client Secret (OAuth)</td><td><a href="https://apisetu.gov.in" target="_blank" rel="noopener">apisetu.gov.in</a> (Government of India's API exchange) &mdash; register as a DigiLocker requester organisation. This is the slowest one to get: an organisational registration/approval process, not a self-serve signup.</td><td>Server-only env vars, consumed by the buyer-verification flow (not built yet)</td></tr>
+      </table>
+    </div>
+
+    <div class="schema-card">
+      <div class="head"><span class="name">5. Voucher provider(s)</span><span class="desc">unblocks: actually paying out referral rewards</span></div>
+      <table>
+        <tr><th>Get</th><th>Where</th><th>Goes into</th></tr>
+        <tr><td>API key (per provider &mdash; pick one or more)</td><td><a href="https://www.xoxoday.com" target="_blank" rel="noopener">xoxoday.com</a>, <a href="https://www.enkash.com" target="_blank" rel="noopener">enkash.com</a>, <a href="https://www.pinelabs.com" target="_blank" rel="noopener">pinelabs.com</a> (Qwikcilver), or <a href="https://business.amazon.in" target="_blank" rel="noopener">business.amazon.in</a> &mdash; each is its own business signup</td><td>Stored in <b>Supabase Vault</b>, referenced by <code>voucher_providers.credential_ref</code> &mdash; never as a plain column (see section 05)</td></tr>
+      </table>
+    </div>
+
+    <div class="callout">
+      <b>What's already true without any of these</b>
+      Nothing above blocks Supabase from working on its own. Connect Supabase alone and admin login + pricing go fully live today &mdash; verified live this session. The other four are independent third-party accounts that unlock one feature each, whenever you're ready for them; none of them block each other.
+    </div>
+  </section>
+
+  <section id="mindmap">
+    <p class="num">01</p>
+    <h2>The whole surface, one map</h2>
+    <p class="lede">Three Next.js apps, each backed by a slice of the same Postgres database. Leaf nodes are the tables that slice will read and write once Supabase is connected.</p>
+    <div class="mermaid-shell">
+      <pre class="mermaid">
+mindmap
+  root((aglaowner))
+    Marketplace
+      Public catalog
+        categories
+        listings
+        listing_media
+      Seller flow
+        listings
+        listing_media
+        payments
+      Buyer flow
+        connect_requests
+        payments
+        rate_limits
+    Referral network
+      Referrer identity
+        profiles
+      Earning
+        referral_activity
+        credit_rules
+        reward_tiers
+      Redeeming
+        reward_history
+        voucher_providers
+    Admin console
+      Program tuning
+        credit_rules
+        reward_tiers
+        promotions
+      Listing policy
+        listing_type_settings
+      Payouts
+        voucher_providers
+        reward_history
+    Shared spine
+      profiles
+      auth.users
+      handle_new_user trigger
+      Storage buckets
+      </pre>
+    </div>
+  </section>
+
+  <section id="erd">
+    <p class="num">02</p>
+    <h2>Entity relationships</h2>
+    <p class="lede">Every table hangs off <code>profiles</code>, the one row per verified phone number that a person becomes a seller, buyer, or referrer through &mdash; there is no separate account system.</p>
+    <div class="figure-shell">
+      <figure>
+        <svg viewBox="0 0 980 620" role="img" aria-label="Entity relationship diagram: profiles is the hub table, referencing auth.users, and is referenced by listings, referral_activity, and reward_history; listings connects to listing_media, connect_requests, and payments; categories feeds listings; listing_type_settings and credit_rules and reward_tiers and promotions stand apart as admin-tuned config tables.">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <style>
+            .box { fill: none; stroke: currentColor; stroke-width: 1.3; }
+            .box.hub { stroke: var(--oxide); stroke-width: 2; }
+            .box.cfg { stroke-dasharray: 4 3; opacity: .8; }
+            .lbl { font-size: 13px; font-weight: 600; }
+            .cap { font-size: 10px; opacity: .65; }
+            .edge { stroke: currentColor; stroke-width: 1.2; fill: none; opacity: .75; }
+            .edge-lbl { font-size: 10px; opacity: .8; }
+          </style>
+
+          <!-- auth.users -->
+          <rect class="box" x="410" y="20" width="160" height="46" rx="7"></rect>
+          <text class="lbl" x="490" y="41" text-anchor="middle">auth.users</text>
+          <text class="cap" x="490" y="56" text-anchor="middle">Supabase-managed</text>
+
+          <!-- profiles (hub) -->
+          <rect class="box hub" x="390" y="110" width="200" height="56" rx="7"></rect>
+          <text class="lbl" x="490" y="134" text-anchor="middle">profiles</text>
+          <text class="cap" x="490" y="150" text-anchor="middle">1 row per phone number</text>
+
+          <line class="edge" x1="490" y1="66" x2="490" y2="110" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="500" y="88">extends</text>
+
+          <!-- categories -->
+          <rect class="box" x="30" y="230" width="150" height="46" rx="7"></rect>
+          <text class="lbl" x="105" y="258" text-anchor="middle">categories</text>
+
+          <!-- listings -->
+          <rect class="box" x="240" y="230" width="150" height="46" rx="7"></rect>
+          <text class="lbl" x="315" y="258" text-anchor="middle">listings</text>
+
+          <line class="edge" x1="180" y1="253" x2="240" y2="253" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="185" y="245">categorizes</text>
+
+          <line class="edge" x1="430" y1="166" x2="330" y2="230" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="345" y="200">owner_id</text>
+
+          <!-- listing_media -->
+          <rect class="box" x="240" y="320" width="150" height="46" rx="7"></rect>
+          <text class="lbl" x="315" y="348" text-anchor="middle">listing_media</text>
+          <line class="edge" x1="315" y1="276" x2="315" y2="320" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="325" y="302">listing_id</text>
+
+          <!-- connect_requests -->
+          <rect class="box" x="440" y="230" width="170" height="46" rx="7"></rect>
+          <text class="lbl" x="525" y="258" text-anchor="middle">connect_requests</text>
+          <line class="edge" x1="390" y1="253" x2="440" y2="253" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="392" y="245">unlocks contact for</text>
+          <line class="edge" x1="500" y1="166" x2="525" y2="230" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="500" y="200">buyer_id</text>
+
+          <!-- payments -->
+          <rect class="box" x="650" y="230" width="140" height="46" rx="7"></rect>
+          <text class="lbl" x="720" y="258" text-anchor="middle">payments</text>
+          <line class="edge" x1="610" y1="253" x2="650" y2="253" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="612" y="245">funds</text>
+
+          <!-- referral_activity -->
+          <rect class="box" x="650" y="320" width="150" height="46" rx="7"></rect>
+          <text class="lbl" x="725" y="348" text-anchor="middle">referral_activity</text>
+          <line class="edge" x1="330" y1="276" x2="680" y2="320" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="480" y="316">logs credit for</text>
+          <line class="edge" x1="560" y1="166" x2="740" y2="320" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="640" y="260" transform="rotate(0)"></text>
+          <text class="edge-lbl" x="600" y="180">referrer_id</text>
+
+          <!-- reward_history -->
+          <rect class="box" x="650" y="410" width="150" height="46" rx="7"></rect>
+          <text class="lbl" x="725" y="438" text-anchor="middle">reward_history</text>
+          <line class="edge" x1="725" y1="366" x2="725" y2="410" marker-end="url(#arrow)"></line>
+          <text class="edge-lbl" x="735" y="392">redeemed via</text>
+
+          <!-- config cluster -->
+          <rect class="box cfg" x="30" y="430" width="150" height="44" rx="7"></rect>
+          <text class="lbl" x="105" y="456" text-anchor="middle">credit_rules</text>
+
+          <rect class="box cfg" x="200" y="430" width="150" height="44" rx="7"></rect>
+          <text class="lbl" x="275" y="456" text-anchor="middle">reward_tiers</text>
+
+          <rect class="box cfg" x="30" y="500" width="150" height="44" rx="7"></rect>
+          <text class="lbl" x="105" y="526" text-anchor="middle">promotions</text>
+
+          <rect class="box cfg" x="200" y="500" width="180" height="44" rx="7"></rect>
+          <text class="lbl" x="290" y="526" text-anchor="middle">listing_type_settings</text>
+
+          <rect class="box cfg" x="410" y="500" width="170" height="44" rx="7"></rect>
+          <text class="lbl" x="495" y="526" text-anchor="middle">voucher_providers</text>
+
+          <text class="cap" x="30" y="580">- - - dashed = admin-tuned config, no owner_id, read by every app</text>
+        </svg>
+      </figure>
+      <figcaption><b>Reading this map:</b> the bold box is the only table every other table ultimately traces back to. Dashed boxes are program-wide settings the admin console edits and every client reads &mdash; they carry no foreign key back to a person.</figcaption>
+    </div>
+  </section>
+
+  <section id="write-flow">
+    <p class="num">03</p>
+    <h2>Write path &mdash; publishing a listing</h2>
+    <p class="lede">The mechanism that matters here: the listing exists in Postgres <em>before</em> payment, sits invisible to the public catalog until payment confirms, and the money never touches the browser.</p>
+    <div class="figure-shell">
+      <figure>
+        <svg viewBox="0 0 980 300" role="img" aria-label="Sequence: seller's browser sends OTP to Supabase Auth which mints a session; browser inserts a draft listing and uploads media to Storage under RLS; browser creates a payment order; Razorpay's webhook hits a Next.js API route with the service role key, which verifies the payment signature and flips the listing status to active in one transaction.">
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <style>
+            .lane { stroke: currentColor; stroke-width: 1; opacity: .3; }
+            .lane-lbl { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
+            .step { stroke: currentColor; stroke-width: 1.4; fill: none; }
+            .step.write { stroke: var(--oxide); }
+            .step.trust { stroke: var(--stamp); }
+            .aline { stroke: currentColor; stroke-width: 1.3; fill: none; marker-end: url(#arrow2); }
+            .albl { font-size: 10.5px; }
+            .node { font-size: 12px; font-weight: 600; }
+          </style>
+
+          <!-- lanes -->
+          <line class="lane" x1="120" y1="30" x2="120" y2="280"></line>
+          <line class="lane" x1="380" y1="30" x2="380" y2="280"></line>
+          <line class="lane" x1="640" y1="30" x2="640" y2="280"></line>
+          <line class="lane" x1="880" y1="30" x2="880" y2="280"></line>
+          <text class="lane-lbl" x="120" y="20" text-anchor="middle">Seller's browser</text>
+          <text class="lane-lbl" x="380" y="20" text-anchor="middle">Supabase Auth</text>
+          <text class="lane-lbl" x="640" y="20" text-anchor="middle">Postgres + Storage (RLS)</text>
+          <text class="lane-lbl" x="880" y="20" text-anchor="middle">API route (service role)</text>
+
+          <!-- step 1: OTP -->
+          <line class="aline" x1="120" y1="55" x2="380" y2="55"></line>
+          <text class="albl" x="130" y="49">verifyOtp(mobile, code)</text>
+          <line class="aline" x1="380" y1="75" x2="120" y2="75"></line>
+          <text class="albl" x="130" y="90">session &rarr; auth.uid()</text>
+
+          <!-- step 2: insert draft -->
+          <line class="aline write" x1="120" y1="115" x2="640" y2="115"></line>
+          <text class="albl" x="130" y="109">insert listings (status: <tspan class="mono">draft</tspan>)</text>
+
+          <!-- step 3: upload media -->
+          <line class="aline write" x1="120" y1="150" x2="640" y2="150"></line>
+          <text class="albl" x="130" y="144">upload(listing-media/&lt;listing_id&gt;/*)</text>
+
+          <!-- step 4: payment order -->
+          <line class="aline write" x1="120" y1="185" x2="640" y2="185"></line>
+          <text class="albl" x="130" y="179">insert payments (status: <tspan class="mono">pending</tspan>)</text>
+
+          <!-- step 5: webhook -->
+          <line class="aline trust" x1="880" y1="220" x2="640" y2="220"></line>
+          <text class="albl" x="660" y="214">POST /api/webhooks/razorpay</text>
+
+          <!-- step 6: activate -->
+          <line class="aline trust" x1="880" y1="250" x2="640" y2="250"></line>
+          <text class="albl" x="660" y="244">activate_listing_from_payment() &mdash; atomic</text>
+
+          <text class="node" x="120" y="270" text-anchor="middle" style="opacity:.65; font-weight:400;">never sees the</text>
+          <text class="node" x="120" y="284" text-anchor="middle" style="opacity:.65; font-weight:400;">payment secret key</text>
+        </svg>
+      </figure>
+      <figcaption><b>Why the split matters:</b> steps 1&ndash;4 run entirely under the seller's own RLS policy &mdash; they can only ever touch a listing where <code>owner_id = auth.uid()</code>. Step 6 runs with the service-role key inside <code>src/app/api/webhooks/razorpay/route.ts</code>, which RLS cannot see, because "did the payment actually clear" is not a fact the client is trusted to assert about itself. <b>Built and verified live</b> against a real Supabase project &mdash; signature check (valid/tampered/missing), the atomic activation function, and a full synthetic payment-to-active-listing run, cleaned up after. See <code>requirements/AUDIT.md</code>.</figcaption>
+    </div>
+  </section>
+
+  <section id="read-flow">
+    <p class="num">04</p>
+    <h2>Read path &mdash; unlocking a seller's contact</h2>
+    <p class="lede">The catalog itself is public. What's gated is the one field that matters: the seller's phone number, released only through a function that checks the buyer's DigiLocker verification server-side.</p>
+    <div class="figure-shell">
+      <figure>
+        <svg viewBox="0 0 980 260" role="img" aria-label="Sequence: buyer's browser selects listings directly from Postgres, allowed by an RLS policy that only exposes rows where status equals active; when the buyer wants contact info, the browser instead calls an RPC function; the function checks profiles.digilocker_verified_at for the calling user, and only if verified does it insert a connect_request row and return the seller's mobile number, otherwise it raises an exception telling the client to complete verification.">
+          <defs>
+            <marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <style>
+            .aline3 { stroke: currentColor; stroke-width: 1.3; fill: none; marker-end: url(#arrow3); }
+            .aline3.gate { stroke: var(--navy); }
+            .albl3 { font-size: 10.5px; }
+            .lane3 { stroke: currentColor; stroke-width: 1; opacity: .3; }
+            .lane3-lbl { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
+          </style>
+
+          <line class="lane3" x1="130" y1="30" x2="130" y2="240"></line>
+          <line class="lane3" x1="480" y1="30" x2="480" y2="240"></line>
+          <line class="lane3" x1="830" y1="30" x2="830" y2="240"></line>
+          <text class="lane3-lbl" x="130" y="20" text-anchor="middle">Buyer's browser</text>
+          <text class="lane3-lbl" x="480" y="20" text-anchor="middle">Postgres RLS</text>
+          <text class="lane3-lbl" x="830" y="20" text-anchor="middle">reveal_seller_contact() &mdash; SECURITY DEFINER</text>
+
+          <line class="aline3" x1="130" y1="60" x2="480" y2="60"></line>
+          <text class="albl3" x="140" y="54">select * from listings where status='active'</text>
+          <line class="aline3" x1="480" y1="85" x2="130" y2="85"></line>
+          <text class="albl3" x="140" y="100">rows (no mobile column exposed)</text>
+
+          <line class="aline3 gate" x1="130" y1="140" x2="830" y2="140"></line>
+          <text class="albl3" x="140" y="134">rpc('reveal_seller_contact', &#123; listing_id &#125;)</text>
+
+          <line class="aline3 gate" x1="830" y1="175" x2="480" y2="175"></line>
+          <text class="albl3" x="500" y="169">check profiles.digilocker_verified_at</text>
+
+          <line class="aline3 gate" x1="830" y1="200" x2="130" y2="200"></line>
+          <text class="albl3" x="140" y="215">verified &rarr; mobile · unverified &rarr; 403 needs_verification</text>
+
+          <line class="aline3" x1="830" y1="225" x2="480" y2="225" style="opacity:.6"></line>
+          <text class="albl3" x="500" y="238" style="opacity:.6">on success: insert connect_requests</text>
+        </svg>
+      </figure>
+      <figcaption><b>The point of the RPC:</b> a plain RLS policy can hide a whole row, but it can't hide one column from an otherwise-visible row while showing the rest. The mobile number never enters the row RLS evaluates for the public catalog query &mdash; it only exists behind the function, which is the actual security boundary here, not the table.</figcaption>
+    </div>
+  </section>
+
+  <section id="schema">
+    <p class="num">05</p>
+    <h2>Schema reference</h2>
+    <p class="lede">Grouped by the app that owns the write path. Types map directly onto the existing <code>src/types/*.ts</code> interfaces so the data-access layer is a near-transliteration, not a rewrite.</p>
+
+    <div class="domain-grid">
+      <div>
+
+        <h3>Shared spine</h3>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">profiles</span><span class="desc">one row per verified phone number</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span><span class="badge fk">FK</span></td><td>uuid</td><td>= auth.users.id</td></tr>
+            <tr><td>phone<span class="badge uq">UQ</span></td><td>text</td><td>E.164, set by Supabase phone auth</td></tr>
+            <tr><td>is_seller</td><td>bool</td><td>has &ge;1 listing</td></tr>
+            <tr><td>is_referrer</td><td>bool</td><td>has a referral_code</td></tr>
+            <tr><td>referral_code</td><td>text</td><td>nullable, unique when set</td></tr>
+            <tr><td>digilocker_verified_at</td><td>timestamptz</td><td>null until buyer completes DigiLocker</td></tr>
+            <tr><td>role</td><td>text</td><td><span class="mono">'user' | 'admin'</span>, default 'user'</td></tr>
+            <tr><td>created_at</td><td>timestamptz</td><td>default now()</td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">referral_codes_public</span><span class="desc">view, not a table</span></div>
+          <table>
+            <tr><td>referral_code</td><td>text</td><td>only column exposed &mdash; the <code>profiles</code> RLS policy this replaces would have leaked <code>phone</code> to anyone via a plain <code>select *</code>, since RLS gates rows, not columns</td></tr>
+          </table>
+        </div>
+
+        <h3>Marketplace</h3>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">categories</span><span class="desc">static-ish, admin-editable</span></div>
+          <table>
+            <tr><td>slug<span class="badge pk">PK</span></td><td>text</td><td>e.g. 'food-beverage'</td></tr>
+            <tr><td>name</td><td>text</td><td>"Food & Beverage"</td></tr>
+            <tr><td>icon</td><td>text</td><td>tabler icon key</td></tr>
+            <tr><td>hint</td><td>text</td><td>subtitle copy</td></tr>
+            <tr><td>sort_order</td><td>int</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">listings</span><span class="desc">the core sellable unit</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>uuid</td><td>default gen_random_uuid()</td></tr>
+            <tr><td>owner_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; profiles.id</td></tr>
+            <tr><td>ref<span class="badge uq">UQ</span></td><td>text</td><td>"AGL-9T21" display code</td></tr>
+            <tr><td>type</td><td>text</td><td><span class="mono">business|equipment|lease|inventory</span></td></tr>
+            <tr><td>category_slug<span class="badge fk">FK</span></td><td>text</td><td>&rarr; categories.slug</td></tr>
+            <tr><td>title / description</td><td>text</td><td></td></tr>
+            <tr><td>city / locality</td><td>text</td><td></td></tr>
+            <tr><td>price_band / turnover_band / years_band</td><td>text</td><td>banded, not exact figures</td></tr>
+            <tr><td>reason</td><td>text</td><td></td></tr>
+            <tr><td>debt_note</td><td>text</td><td>nullable</td></tr>
+            <tr><td>referral_code_used<span class="badge fk">FK</span></td><td>text</td><td>&rarr; profiles.referral_code, nullable &mdash; <code>check</code> below blocks self-referral</td></tr>
+            <tr><td>parent_listing_id<span class="badge fk">FK</span></td><td>uuid</td><td>equipment add-on &rarr; listings.id, nullable</td></tr>
+            <tr><td>status</td><td>text</td><td><span class="mono">draft|active|archived|deleted</span></td></tr>
+            <tr><td>active_until / archive_until</td><td>timestamptz</td><td>drives the 90/120-day cycle</td></tr>
+            <tr><td>created_at / updated_at</td><td>timestamptz</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">listing_media</span><span class="desc">photos &amp; videos, ordered</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>uuid</td><td></td></tr>
+            <tr><td>listing_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; listings.id, cascade delete</td></tr>
+            <tr><td>storage_path</td><td>text</td><td>Storage object key</td></tr>
+            <tr><td>kind</td><td>text</td><td><span class="mono">image|video</span></td></tr>
+            <tr><td>is_cover</td><td>bool</td><td>flyer thumbnail source</td></tr>
+            <tr><td>sort_order</td><td>int</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">connect_requests</span><span class="desc">buyer &rarr; seller unlock log</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>uuid</td><td></td></tr>
+            <tr><td>listing_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; listings.id</td></tr>
+            <tr><td>buyer_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; profiles.id</td></tr>
+            <tr><td>created_at</td><td>timestamptz</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">payments</span><span class="desc">listing fees, reactivation, add-ons</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>uuid</td><td></td></tr>
+            <tr><td>listing_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; listings.id</td></tr>
+            <tr><td>purpose</td><td>text</td><td><span class="mono">listing|reactivation|addon</span></td></tr>
+            <tr><td>amount_paise</td><td>int</td><td>never a float for money</td></tr>
+            <tr><td>status</td><td>text</td><td><span class="mono">pending|paid|failed</span></td></tr>
+            <tr><td>provider_ref</td><td>text</td><td>gateway order id</td></tr>
+            <tr><td>created_at</td><td>timestamptz</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">rate_limits</span><span class="desc">throttles reveal_seller_contact()</span></div>
+          <table>
+            <tr><td>key<span class="badge pk">PK</span></td><td>text</td><td>'reveal_seller_contact:&lt;uid&gt;:&lt;yyyy-mm-dd-hh-mi&gt;'</td></tr>
+            <tr><td>count</td><td>int</td><td>default 1, incremented per call in that minute</td></tr>
+            <tr><td>window_start</td><td>timestamptz</td><td></td></tr>
+          </table>
+        </div>
+
+      </div>
+      <div>
+
+        <h3>Referral network</h3>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">referral_activity</span><span class="desc">one row per credited listing event</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>uuid</td><td></td></tr>
+            <tr><td>referrer_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; profiles.id</td></tr>
+            <tr><td>listing_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; listings.id</td></tr>
+            <tr><td>credits</td><td>int</td><td>snapshot at time of credit</td></tr>
+            <tr><td>created_at</td><td>timestamptz</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">credit_rules</span><span class="desc">admin-tuned, read by everyone</span></div>
+          <table>
+            <tr><td>action<span class="badge pk">PK</span></td><td>text</td><td>"business-listing" etc.</td></tr>
+            <tr><td>credits</td><td>int</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">reward_tiers</span><span class="desc">the repeating voucher ladder</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>int</td><td></td></tr>
+            <tr><td>credits_threshold</td><td>int</td><td></td></tr>
+            <tr><td>voucher_amount_paise</td><td>int</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">promotions</span><span class="desc">temporary override of the ladder</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>int</td><td>singleton row, id=1</td></tr>
+            <tr><td>mode</td><td>text</td><td><span class="mono">flat|multiplier|free-listing</span></td></tr>
+            <tr><td>flat_amount_paise</td><td>int</td><td>nullable</td></tr>
+            <tr><td>multiplier</td><td>numeric</td><td>nullable</td></tr>
+            <tr><td>starts_at / ends_at</td><td>timestamptz</td><td></td></tr>
+            <tr><td>active</td><td>bool</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">voucher_providers</span><span class="desc">Xoxoday / EnKash / Qwikcilver / Amazon</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>text</td><td>"xoxoday" etc.</td></tr>
+            <tr><td>name</td><td>text</td><td></td></tr>
+            <tr><td>connected</td><td>bool</td><td></td></tr>
+            <tr><td>credential_ref</td><td>text</td><td>Vault secret name, <em>never the key itself</em></td></tr>
+            <tr><td>gst_note</td><td>text</td><td></td></tr>
+          </table>
+        </div>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">reward_history</span><span class="desc">vouchers actually issued</span></div>
+          <table>
+            <tr><td>id<span class="badge pk">PK</span></td><td>uuid</td><td></td></tr>
+            <tr><td>referrer_id<span class="badge fk">FK</span></td><td>uuid</td><td>&rarr; profiles.id</td></tr>
+            <tr><td>provider_id<span class="badge fk">FK</span></td><td>text</td><td>&rarr; voucher_providers.id</td></tr>
+            <tr><td>amount_paise</td><td>int</td><td></td></tr>
+            <tr><td>issued_at</td><td>timestamptz</td><td></td></tr>
+          </table>
+        </div>
+
+        <h3>Admin</h3>
+
+        <div class="schema-card">
+          <div class="head"><span class="name">listing_type_settings</span><span class="desc">fees &amp; windows per listing type</span></div>
+          <table>
+            <tr><td>type<span class="badge pk">PK</span></td><td>text</td><td><span class="mono">business|equipment|lease|inventory</span></td></tr>
+            <tr><td>active_days</td><td>int</td><td>90 for business, 60 for the rest</td></tr>
+            <tr><td>archive_days</td><td>int</td><td>120 / 30</td></tr>
+            <tr><td>listing_fee_paise</td><td>int</td><td></td></tr>
+            <tr><td>reactivation_fee_paise</td><td>int</td><td></td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="rls">
+    <p class="num">06</p>
+    <h2>Who can touch what</h2>
+    <p class="lede">Every table below has RLS turned on the moment it's created &mdash; there is no table that ships open. The four policies below cover the whole surface.</p>
+
+    <div class="rls-grid">
+      <div class="rls-card">
+        <div class="who"><span class="dot" style="background: var(--ink-soft)"></span><h4>Anonymous</h4></div>
+        <p>Read-only on <code>listings</code> where <code>status = 'active'</code>, <code>categories</code>, and public program stats. No inserts, no contact fields.</p>
+      </div>
+      <div class="rls-card">
+        <div class="who"><span class="dot" style="background: var(--oxide)"></span><h4>Owner (seller)</h4></div>
+        <p>Full CRUD on rows where <code>owner_id = auth.uid()</code>, across draft, active and archived states. Can't touch anyone else's listing, ever.</p>
+      </div>
+      <div class="rls-card">
+        <div class="who"><span class="dot" style="background: var(--navy)"></span><h4>Verified buyer</h4></div>
+        <p>Same read as anonymous, plus the <code>reveal_seller_contact()</code> RPC &mdash; gated on <code>profiles.digilocker_verified_at</code>, not a table grant.</p>
+      </div>
+      <div class="rls-card">
+        <div class="who"><span class="dot" style="background: var(--stamp)"></span><h4>Admin</h4></div>
+        <p>Bypasses per-row ownership via a <code>role = 'admin'</code> check &mdash; full read/write on config tables (<code>credit_rules</code>, <code>promotions</code>, <code>listing_type_settings</code>, <code>voucher_providers</code>) and read on everything else.</p>
+      </div>
+    </div>
+
+    <p class="lede" style="margin-top: 18px;">The RLS rows above are the database-level policy; the app-level gate that gets a request there in the first place is <code>src/proxy.ts</code>. It checks <code>app_metadata.role</code> (never <code>user_metadata</code> &mdash; that's client-editable) from the caller's Supabase session on every <code>/admin/*</code> request, redirecting to <code>/admin/login</code> (magic-link sign-in, <code>src/app/admin/login</code>) otherwise. <code>src/app/auth/confirm</code> completes that link. <code>src/lib/safe-redirect.ts</code> constrains the post-login <code>?next=</code> redirect target to same-origin relative paths only &mdash; without it, a crafted magic-link could redirect a freshly-authenticated admin off-site.</p>
+
+    <pre><code><span class="comment">-- every table FKs to profiles.id and every role check reads from it, so a signup</span>
+<span class="comment">-- with no matching profiles row breaks the first write and silently fails every</span>
+<span class="comment">-- role check. This is the first thing that must exist -- everything else assumes it.</span>
+<span class="k">create function</span> handle_new_user()
+<span class="k">returns trigger</span> <span class="k">as</span> $$
+<span class="k">begin</span>
+  <span class="k">insert into</span> profiles (id, phone)
+  <span class="k">values</span> (new.id, new.phone)
+  <span class="k">on conflict</span> (id) <span class="k">do nothing</span>;
+  <span class="k">return</span> new;
+<span class="k">end</span>;
+$$ <span class="k">language</span> plpgsql <span class="k">security definer</span>;
+
+<span class="k">create trigger</span> on_auth_user_created
+  <span class="k">after insert on</span> auth.users
+  <span class="k">for each row execute function</span> handle_new_user();
+
+<span class="comment">-- sellers edit their own listing content freely...</span>
+<span class="k">create policy</span> "sellers edit own listing content"
+  <span class="k">on</span> listings <span class="k">for all</span>
+  <span class="k">using</span> (owner_id = auth.uid())
+  <span class="k">with check</span> (
+    owner_id = auth.uid()
+    <span class="comment">-- ...but never touch status or the timers themselves &mdash;</span>
+    <span class="comment">-- see the trigger below. A blanket owner_id-only WITH CHECK here</span>
+    <span class="comment">-- would let a seller flip status='active' without ever paying.</span>
+  );
+
+<span class="comment">-- status/active_until/archive_until are set only by this trigger,</span>
+<span class="comment">-- which runs as the table owner and is the sole path from the</span>
+<span class="comment">-- payment webhook's service-role UPDATE to a live listing</span>
+<span class="k">create function</span> guard_listing_status_columns()
+<span class="k">returns trigger</span> <span class="k">as</span> $$
+<span class="k">begin</span>
+  <span class="k">if</span> (new.status, new.active_until, new.archive_until)
+      <span class="k">is distinct from</span> (old.status, old.active_until, old.archive_until)
+     <span class="k">and</span> auth.role() &lt;&gt; <span class="mono">'service_role'</span> <span class="k">then</span>
+    <span class="k">raise exception</span> <span class="mono">'status/timers are set by payment confirmation only'</span>;
+  <span class="k">end if</span>;
+  <span class="k">return</span> new;
+<span class="k">end</span>;
+$$ <span class="k">language</span> plpgsql <span class="k">security definer</span>;
+
+<span class="k">create trigger</span> lock_listing_status
+  <span class="k">before update on</span> listings
+  <span class="k">for each row execute function</span> guard_listing_status_columns();
+
+<span class="comment">-- the HTML prototype only checked this client-side (sellRefError) &mdash;</span>
+<span class="comment">-- promoted to a trigger so a direct API call can't bypass it</span>
+<span class="comment">-- (plain CHECK constraints can't subquery another table in Postgres)</span>
+<span class="k">create function</span> guard_no_self_referral()
+<span class="k">returns trigger</span> <span class="k">as</span> $$
+<span class="k">begin</span>
+  <span class="k">if</span> new.referral_code_used <span class="k">is not null</span>
+     <span class="k">and</span> new.referral_code_used = (
+       <span class="k">select</span> referral_code <span class="k">from</span> profiles <span class="k">where</span> id = new.owner_id
+     ) <span class="k">then</span>
+    <span class="k">raise exception</span> <span class="mono">'referrers cannot use their own code on their own listing'</span>;
+  <span class="k">end if</span>;
+  <span class="k">return</span> new;
+<span class="k">end</span>;
+$$ <span class="k">language</span> plpgsql;
+
+<span class="k">create trigger</span> no_self_referral
+  <span class="k">before insert or update on</span> listings
+  <span class="k">for each row execute function</span> guard_no_self_referral();
+
+<span class="comment">-- config tables: everyone reads, only admins write</span>
+<span class="k">create policy</span> "anyone can read credit rules"
+  <span class="k">on</span> credit_rules <span class="k">for select</span> <span class="k">using</span> (<span class="k">true</span>);
+
+<span class="k">create policy</span> "only admins edit credit rules"
+  <span class="k">on</span> credit_rules <span class="k">for all</span>
+  <span class="k">using</span> (<span class="k">exists</span> (
+    <span class="k">select</span> 1 <span class="k">from</span> profiles
+    <span class="k">where</span> id = auth.uid() <span class="k">and</span> role = <span class="mono">'admin'</span>
+  ));</code></pre>
+
+    <div class="callout green">
+      <b>Why a function instead of a view, for contact reveal</b>
+      A view still runs under the querying user's row-level policy per-row; it can hide the whole row but can't conditionally hide one column while showing the rest of that same row. <code>reveal_seller_contact(listing_id)</code> is <code>security definer</code>, so it runs as the function owner, checks the caller's verification explicitly, and is the only path that ever selects <code>profiles.phone</code> for a seller.
+    </div>
+
+    <div class="callout">
+      <b>Rate limit the reveal, not just the anonymous read</b>
+      DigiLocker verification answers "is this a real buyer," not "how many contacts has this buyer pulled in the last minute." Without a limit, one verified account can call <code>reveal_seller_contact()</code> across every active listing id and harvest every seller's phone number. Cap it inside the function itself &mdash; e.g. a per-<code>auth.uid()</code> counter in a small <code>rate_limits</code> table, checked and incremented before the row is returned (Postgres advisory locks or a rolling-window count both work; the point is the check lives in the same <code>security definer</code> function, not in a layer the client could skip).
+    </div>
+  </section>
+
+  <section id="storage">
+    <p class="num">07</p>
+    <h2>Storage &amp; environment keys</h2>
+    <p class="lede">Two buckets, both private by default; signed URLs stand in for public ones so a scraped listing can't be hot-linked after it's archived.</p>
+
+    <table style="margin-bottom: 22px;">
+      <tr><th>Bucket</th><th>Contents</th><th>Access</th></tr>
+      <tr><td class="mono">listing-media</td><td>Seller photos &amp; videos</td><td>Owner writes; public reads only for <code>active</code> listings via signed URL</td></tr>
+      <tr><td class="mono">referral-flyers</td><td>Generated share-card renders</td><td>Owner writes; public reads (marketing asset, no PII)</td></tr>
+    </table>
+
+    <div class="env-grid">
+      <div class="env-card">
+        <div class="k">NEXT_PUBLIC_SUPABASE_URL <span class="scope pub">public</span></div>
+        <p>Project URL &mdash; safe in the browser bundle.</p>
+      </div>
+      <div class="env-card">
+        <div class="k">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY <span class="scope pub">public</span></div>
+        <p>RLS-bound key; every request still runs through the policies above.</p>
+      </div>
+      <div class="env-card">
+        <div class="k">SUPABASE_SERVICE_ROLE_KEY <span class="scope srv">server-only</span></div>
+        <p>Bypasses RLS entirely. Lives only inside <code>src/app/api/webhooks/razorpay/route.ts</code> (via <code>createServiceRoleClient()</code>) &mdash; never imported by any <code>"use client"</code> file.</p>
+      </div>
+      <div class="env-card">
+        <div class="k">Voucher provider API keys <span class="scope srv">server-only</span></div>
+        <p>Stored in Supabase Vault, referenced by <code>voucher_providers.credential_ref</code> &mdash; never as a plain column value.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="migration">
+    <p class="num">08</p>
+    <h2>Where the static data goes</h2>
+    <p class="lede">The existing <code>src/data/*.ts</code> files aren't thrown away &mdash; each becomes the typed shape a data-access function returns, whether the source is a constant or a query.</p>
+    <table>
+      <tr><th>Today</th><th>Becomes</th><th>Lane</th><th>Status</th></tr>
+      <tr><td class="mono">src/data/categories.ts</td><td class="mono">lib/data/categories.ts &rarr; select * from categories</td><td>Marketplace</td><td>still static &mdash; 4 call sites (picker, grid, results, footer) need to move together or not at all</td></tr>
+      <tr><td class="mono">src/data/pricing.ts</td><td class="mono">select * from listing_type_settings, merged onto static copy</td><td>Marketplace</td><td><b>live</b> &mdash; fees/windows real, copy code-owned, tested fallback + 3s timeout; static-generated with 1h ISR (not per-request) via a cookie-free client, so an admin fee edit shows up within an hour, not instantly and not only on redeploy</td></tr>
+      <tr><td class="mono">src/data/listings.ts</td><td class="mono">select * from listings where status='active'</td><td>Marketplace</td><td>still static</td></tr>
+      <tr><td class="mono">src/data/referral.ts</td><td class="mono">joins across referral_activity, reward_tiers, credit_rules</td><td>Referral</td><td>still static</td></tr>
+      <tr><td class="mono">src/data/admin.ts</td><td class="mono">admin-role reads across every config table</td><td>Admin</td><td>still static &mdash; /admin auth is live, its data isn't yet</td></tr>
+      <tr><td class="mono">src/data/faq.ts, how-it-works.ts, trust.ts</td><td class="mono">stays static &mdash; copy, not data</td><td>&mdash;</td><td>by design, never swaps</td></tr>
+    </table>
+    <div class="callout">
+      <b>The one rule that keeps this swap cheap</b>
+      Every UI component in <code>src/components/</code> already consumes a typed prop shape, never a Supabase client directly &mdash; per the <code>UI &rarr; Component &rarr; Typed data &rarr; Data-access layer &rarr; Supabase</code> layering this project started with. Swapping <code>lib/data/*.ts</code> from a static array to a <code>supabase.from(...)</code> call changes zero component files.
+    </div>
+  </section>
+
+  <section id="go-live">
+    <p class="num">09</p>
+    <h2>Connecting real keys</h2>
+    <p class="lede">The order that actually works, in one pass, first try &mdash; skip a step here and the symptom shows up somewhere confusing (a foreign-key error on the very first listing insert, an admin stuck in a redirect loop) rather than at the step that caused it.</p>
+
+    <ol class="steps">
+      <li>
+        <b>Run the migration.</b> <code>supabase db push</code> against the new project, or paste <code>supabase/migrations/20260910220413_init.sql</code> into the SQL Editor and run it once. It creates all 14 tables, every RLS policy, both listing guard triggers, the rate-limited contact-reveal RPC, and the <code>on_auth_user_created</code> trigger &mdash; that last one specifically has to exist <em>before</em> anyone signs in, or their first write fails on a foreign-key violation with no obvious connection to "missing trigger."
+      </li>
+      <li>
+        <b>Set the three env vars</b> in <code>app/.env.local</code> (never commit this file &mdash; already gitignored):
+        <table>
+          <tr><th>Variable</th><th>Where to find it</th></tr>
+          <tr><td class="mono">NEXT_PUBLIC_SUPABASE_URL</td><td>Project Settings &rarr; API &rarr; Project URL</td></tr>
+          <tr><td class="mono">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</td><td>Project Settings &rarr; API &rarr; the anon/publishable key</td></tr>
+          <tr><td class="mono">SUPABASE_SERVICE_ROLE_KEY</td><td>Project Settings &rarr; API &rarr; service_role key &mdash; server-only, never <code>NEXT_PUBLIC_</code></td></tr>
+        </table>
+      </li>
+      <li>
+        <b>Provision the first admin by hand.</b> The login form deliberately passes <code>shouldCreateUser: false</code> &mdash; it will not create an account for an arbitrary email (see the access-control section above). Create the user first (Authentication &rarr; Users &rarr; Add user, in the dashboard), then grant the role via SQL, since <code>app_metadata</code> is not settable from the client:
+        <pre><code><span class="comment">-- run once, in the SQL Editor, after creating the user in the dashboard</span>
+<span class="k">update</span> auth.users
+<span class="k">set</span> raw_app_meta_data = raw_app_meta_data || <span class="mono">'{"role": "admin"}'</span>::jsonb
+<span class="k">where</span> email = <span class="mono">'you@aglaowner.in'</span>;</code></pre>
+      </li>
+      <li>
+        <b>Restart the dev server</b> &mdash; Next.js only reads <code>.env.local</code> at boot, so a running <code>next dev</code> from before the keys existed will keep failing closed.
+      </li>
+    </ol>
+
+    <div class="callout green">
+      <b>Verification checklist &mdash; run all four</b>
+      <ol style="margin: 8px 0 0; padding-left: 18px;">
+        <li>Visit <code>/admin</code> signed out &rarr; redirected to <code>/admin/login</code>, not a 503 (503 means step 2 above is incomplete).</li>
+        <li>Sign in as the admin from step 3 &rarr; lands back on <code>/admin</code>, not bounced to login again (a bounce means the <code>app_metadata</code> update didn't take, or the session cookie wasn't picked up &mdash; re-check the UPDATE ran against the right user).</li>
+        <li>Check <code>select * from profiles where id = auth.uid()</code> as that admin &rarr; one row exists automatically (proves the <code>on_auth_user_created</code> trigger fired).</li>
+        <li>Run <code>supabase db advisors</code> (or the <code>get_advisors</code> MCP tool) &mdash; should report no missing-RLS or security-definer warnings on anything in this migration.</li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <b>Still stubbed after this &mdash; not a bug, a scope boundary</b>
+      Phone OTP (needs an SMS provider wired to Supabase Auth), the client-side Razorpay Checkout trigger, DigiLocker verification, and voucher-provider API calls all stay UI-only until those third-party accounts/pieces exist &mdash; see section 03's write-path diagram for exactly where each one plugs in. The payment <em>webhook</em> itself is already built and verified (section 03). Nothing above unblocks the remaining stubs; it unblocks the marketplace catalog, referral program, admin console, and payment activation running on real data.
+    </div>
+  </section>
+
+</main>
+
+<footer>Data layer architecture &middot; aglaowner &middot; Supabase + Razorpay live and verified &mdash; DigiLocker and voucher providers still pending</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  function currentIsDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t === 'dark') return true;
+    if (t === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: currentIsDark() ? 'dark' : 'base',
+    themeVariables: {
+      fontFamily: "'IBM Plex Mono', monospace",
+      primaryColor: '#E7C9BF',
+      primaryTextColor: '#22291F',
+      primaryBorderColor: '#B3402A',
+      lineColor: '#565F4F',
+      background: '#F6F3EA'
+    }
+  });
+</script>
