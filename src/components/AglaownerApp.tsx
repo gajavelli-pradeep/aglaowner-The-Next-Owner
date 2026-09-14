@@ -26,7 +26,7 @@ interface SelectedCategory {
 
 const HOME: SelectedCategory = { name: "", icon: "" };
 
-export function AglaownerApp() {
+export function AglaownerApp({ pricingPlans }: { pricingPlans: PricingPlan[] }) {
   const [history, setHistory] = useState<Screen[]>(["home"]);
   const [category, setCategory] = useState<SelectedCategory>(HOME);
   const [sellType, setSellType] = useState<ListingType>("business");
@@ -35,7 +35,7 @@ export function AglaownerApp() {
   const [editingListing, setEditingListing] = useState<MyListing | null>(null);
   const [addedEquipOnSell, setAddedEquipOnSell] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const { message, show, showToast } = useToast();
+  const { message, variant, show, showToast } = useToast();
 
   const screen = history[history.length - 1];
   const isFlow = screen !== "home";
@@ -148,6 +148,7 @@ export function AglaownerApp() {
             onCategory={browseCategory}
             onAllCategories={browseAllCategories}
             onPricingCta={handlePricingCta}
+            pricingPlans={pricingPlans}
           />
         )}
 
@@ -400,7 +401,7 @@ export function AglaownerApp() {
       <Footer onCategory={browseCategory} onAllCategories={browseAllCategories} />
 
       <VerifyModal open={modalOpen} onClose={() => setModalOpen(false)} />
-      <Toast message={message} show={show} />
+      <Toast message={message} show={show} variant={variant} />
     </>
   );
 }
