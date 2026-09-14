@@ -24,7 +24,14 @@ export async function POST(request: NextRequest) {
   const { error: roleError } = await supabase.auth.admin.updateUserById(data.user.id, {
     app_metadata: { role: "admin" },
   });
-  if (roleError) return NextResponse.json({ error: roleError.message }, { status: 500 });
+  if (roleError) {
+    // Compensate: an invite email already went out for this account, but it isn't
+    // actually an admin -- leaving it would be a dangling non-admin user that no
+    // longer shows as "not found" for a future invite attempt. Undo the invite
+    // itself so the caller can safely retry from a clean state.
+    await supabase.auth.admin.deleteUser(data.user.id).catch(() => {});
+    return NextResponse.json({ error: `Could not finish setting up the invite (${roleError.message}) -- try again.` }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
