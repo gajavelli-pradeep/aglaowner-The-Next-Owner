@@ -1,17 +1,15 @@
 "use client";
 
-import { ButtonSolid, ButtonGhost, ButtonText, BackButton } from "@/components/ui/Buttons";
-import type { Screen } from "@/lib/screens";
+import Link from "next/link";
+import { BackButton } from "@/components/ui/Buttons";
 
 export function Header({
   isFlow,
   onLogoClick,
-  onNavigate,
   onBack,
 }: {
   isFlow: boolean;
   onLogoClick: () => void;
-  onNavigate: (screen: Screen) => void;
   onBack: () => void;
 }) {
   return (
@@ -36,12 +34,18 @@ export function Header({
 
         {!isFlow ? (
           <div className="flex flex-wrap items-center justify-end gap-2.5">
-            <ButtonSolid onClick={() => onNavigate("sell-category")}>Sell</ButtonSolid>
-            <ButtonGhost onClick={() => onNavigate("buy-category")}>Buy</ButtonGhost>
-            <ButtonText onClick={() => onNavigate("reactivate-lookup")}>Find &amp; reactivate</ButtonText>
-            <a href="/referral" className="px-0.5 py-[9px] text-[13px] font-semibold text-stamp-green">
+            <Link href="/sell" className="rounded-[5px] bg-oxide px-[18px] py-[9px] text-[13px] font-semibold text-paper transition-colors hover:bg-oxide-dark">
+              Sell
+            </Link>
+            <Link href="/buy" className="rounded-[5px] border border-ink px-4 py-[9px] text-[13px] font-semibold transition-colors hover:bg-ink hover:text-paper">
+              Buy
+            </Link>
+            <Link href="/reactivate" className="px-0.5 py-[9px] text-[13px] font-semibold text-ink-soft transition-colors hover:text-oxide">
+              Find &amp; reactivate
+            </Link>
+            <Link href="/referral" className="px-0.5 py-[9px] text-[13px] font-semibold text-stamp-green">
               Join our referral network &amp; earn
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="flex items-center gap-2.5">
