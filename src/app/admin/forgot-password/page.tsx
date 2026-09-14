@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/ui/Buttons";
 
 export default function ForgotPasswordPage() {
@@ -15,15 +14,15 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const supabase = createClient();
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/confirm?next=/admin/reset-password`,
+    const res = await fetch("/api/admin/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     });
     setLoading(false);
-    // Always show the same success state regardless of whether the email exists --
-    // confirming/denying an admin account exists here would leak who has admin access.
-    if (resetError && !/rate limit/i.test(resetError.message)) {
-      setError(resetError.message);
+    if (!res.ok) {
+      const { error: message } = await res.json().catch(() => ({ error: "Something went wrong. Try again." }));
+      setError(message);
       return;
     }
     setSent(true);
@@ -48,7 +47,7 @@ export default function ForgotPasswordPage() {
             autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-md border border-line bg-paper px-3 py-2.5 text-sm"
+            className={`rounded-md border bg-paper px-3 py-2.5 text-sm ${error ? "border-oxide bg-[#fbeeea]" : "border-line"}`}
             placeholder="you@aglaowner.in"
           />
           {error && <p className="text-sm text-oxide">{error}</p>}
