@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { IconSearch } from "@tabler/icons-react";
-import { getAdminReferrers } from "@/lib/data/admin";
+import type { AdminReferrer } from "@/types/admin";
 
-/** #sec-referrers — searchable referrer table with status badges. Search actually filters. */
-export function ReferrersSection({ onToast }: { onToast: (msg: string) => void }) {
-  const referrers = getAdminReferrers();
+/** #sec-referrers — searchable referrer table with status badges, reading real profiles + referral_activity now. Search actually filters. */
+export function ReferrersSection({ onToast, referrers }: { onToast: (msg: string) => void; referrers: AdminReferrer[] }) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -68,17 +67,24 @@ export function ReferrersSection({ onToast }: { onToast: (msg: string) => void }
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">
                     <span
                       className="cursor-pointer text-[12.5px] font-semibold text-navyblue hover:underline"
-                      onClick={() => onToast(`Viewing ${r.code} — this is a prototype, no detail view is wired`)}
+                      onClick={() => onToast(`Viewing ${r.code} — detail view not built yet`)}
                     >
                       View
                     </span>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
+              {filtered.length === 0 && referrers.length > 0 && (
                 <tr>
                   <td colSpan={6} className="px-3 py-6 text-center text-[13px] text-ink-soft">
                     No referrers match &ldquo;{query}&rdquo;.
+                  </td>
+                </tr>
+              )}
+              {referrers.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-3 py-6 text-center text-[13px] text-ink-soft">
+                    No one has generated a referral code yet.
                   </td>
                 </tr>
               )}

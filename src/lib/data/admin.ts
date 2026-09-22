@@ -1,16 +1,4 @@
-import { overviewStats, overviewActivity, adminReferrers, listingTypeSettings, settingsSurfaces, voucherProviderConnects } from "@/data/admin";
-
-export function getOverviewStats() {
-  return overviewStats;
-}
-
-export function getOverviewActivity() {
-  return overviewActivity;
-}
-
-export function getAdminReferrers() {
-  return adminReferrers;
-}
+import { listingTypeSettings, settingsSurfaces, voucherProviderConnects } from "@/data/admin";
 
 export function getListingTypeSettings() {
   return listingTypeSettings;

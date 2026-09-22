@@ -2,6 +2,7 @@ import { AdminApp } from "@/components/admin/AdminApp";
 import { createClient } from "@/lib/supabase/server";
 import { LISTING_TYPES } from "@/lib/data/listing-types";
 import { CREDIT_ACTIONS } from "@/lib/data/reward-rule-map";
+import { getAdminReferralOverview } from "@/lib/data/admin-referrals";
 import { listingTypeSettings as fallbackListingTypeSettings } from "@/data/admin";
 import { creditRules as fallbackCreditRules, rewardTierSeeds as fallbackRewardTiers } from "@/data/referral";
 import type { ListingTypeSetting, AdminCreditRule, AdminRewardTier, AdminPromotion } from "@/types/admin";
@@ -33,12 +34,13 @@ interface PromotionRow {
 
 export default async function AdminPage() {
   const supabase = await createClient();
-  const [{ data: userData }, { data: settingsRows }, { data: creditRows }, { data: tierRows }, { data: promoRow }] = await Promise.all([
+  const [{ data: userData }, { data: settingsRows }, { data: creditRows }, { data: tierRows }, { data: promoRow }, referralOverview] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("listing_type_settings").select("type, active_days, archive_days, listing_fee_paise, reactivation_fee_paise"),
     supabase.from("credit_rules").select("action, credits"),
     supabase.from("reward_tiers").select("id, credits_threshold, voucher_amount_paise").order("credits_threshold", { ascending: true }),
     supabase.from("promotions").select("mode, flat_amount_paise, multiplier, starts_at, ends_at, active").eq("id", 1).maybeSingle(),
+    getAdminReferralOverview(),
   ]);
 
   const byType = new Map<string, ListingTypeSettingsRow>((settingsRows ?? []).map((row: ListingTypeSettingsRow) => [row.type, row]));
@@ -82,6 +84,9 @@ export default async function AdminPage() {
       creditRules={creditRules}
       rewardTiers={rewardTiers}
       promotion={promotion}
+      overviewStats={referralOverview.stats}
+      overviewActivity={referralOverview.activity}
+      referrers={referralOverview.referrers}
     />
   );
 }

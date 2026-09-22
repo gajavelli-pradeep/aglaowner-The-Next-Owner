@@ -10,7 +10,16 @@ import { ProvidersSection } from "@/components/admin/ProvidersSection";
 import { AdminsSection } from "@/components/admin/AdminsSection";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/lib/useToast";
-import type { AdminSection, ListingTypeSetting, AdminCreditRule, AdminRewardTier, AdminPromotion } from "@/types/admin";
+import type {
+  AdminSection,
+  ListingTypeSetting,
+  AdminCreditRule,
+  AdminRewardTier,
+  AdminPromotion,
+  AdminStat,
+  AdminActivityItem,
+  AdminReferrer,
+} from "@/types/admin";
 
 /** Client orchestrator for /admin — sidebar click drives section state (no nested routes), matching the AglaownerApp/ReferralApp convention. */
 export function AdminApp({
@@ -19,12 +28,18 @@ export function AdminApp({
   creditRules,
   rewardTiers,
   promotion,
+  overviewStats,
+  overviewActivity,
+  referrers,
 }: {
   adminEmail: string;
   listingTypeSettings: ListingTypeSetting[];
   creditRules: AdminCreditRule[];
   rewardTiers: AdminRewardTier[];
   promotion: AdminPromotion;
+  overviewStats: AdminStat[];
+  overviewActivity: AdminActivityItem[];
+  referrers: AdminReferrer[];
 }) {
   const [section, setSection] = useState<AdminSection>("overview");
   const { message, show, showToast } = useToast();
@@ -33,8 +48,8 @@ export function AdminApp({
     <div className="flex min-h-screen flex-col md:flex-row">
       <AdminSidebar active={section} onNavigate={setSection} adminEmail={adminEmail} />
       <main className="max-w-[1180px] flex-1 px-5 py-6 md:px-10 md:py-8">
-        {section === "overview" && <OverviewSection onNavigate={setSection} />}
-        {section === "referrers" && <ReferrersSection onToast={showToast} />}
+        {section === "overview" && <OverviewSection onNavigate={setSection} stats={overviewStats} activity={overviewActivity} promotion={promotion} />}
+        {section === "referrers" && <ReferrersSection onToast={showToast} referrers={referrers} />}
         {section === "rules" && (
           <RewardRulesSection onToast={showToast} initialCreditRules={creditRules} initialRewardTiers={rewardTiers} initialPromotion={promotion} />
         )}

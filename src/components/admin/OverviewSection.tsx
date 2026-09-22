@@ -1,14 +1,26 @@
 "use client";
 
 import { IconRocket } from "@tabler/icons-react";
-import { getOverviewStats, getOverviewActivity } from "@/lib/data/admin";
-import type { AdminSection } from "@/types/admin";
+import type { AdminSection, AdminStat, AdminActivityItem, AdminPromotion } from "@/types/admin";
 
-/** #sec-overview — stat grid, launch-promo banner, recent referral activity table. */
-export function OverviewSection({ onNavigate }: { onNavigate: (section: AdminSection) => void }) {
-  const stats = getOverviewStats();
-  const activity = getOverviewActivity();
+const PROMO_MODE_COPY: Record<AdminPromotion["mode"], (p: AdminPromotion) => string> = {
+  flat: (p) => `Every successful referral earns a flat ₹${p.flatAmount} voucher, no ladder.`,
+  multiplier: (p) => `Every credit earned is multiplied ${p.multiplier}x until the promotion ends.`,
+  "free-listing": () => "The referred seller's listing fee is waived entirely during the promotion.",
+};
 
+/** #sec-overview — stat grid, live promo banner, recent referral activity table -- all real reads now, no mock data. */
+export function OverviewSection({
+  onNavigate,
+  stats,
+  activity,
+  promotion,
+}: {
+  onNavigate: (section: AdminSection) => void;
+  stats: AdminStat[];
+  activity: AdminActivityItem[];
+  promotion: AdminPromotion;
+}) {
   return (
     <div>
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
@@ -18,18 +30,23 @@ export function OverviewSection({ onNavigate }: { onNavigate: (section: AdminSec
         </div>
       </div>
 
-      <div className="mb-[26px] flex flex-wrap items-center justify-between gap-3 rounded-lg border border-mustard bg-[#f0e2cf] px-5 py-4">
-        <div className="flex items-start gap-3">
-          <IconRocket size={19} className="mt-px shrink-0 text-mustard-dark" stroke={1.75} />
-          <div>
-            <strong className="mb-0.5 block text-[13.5px]">Launch promotion is active</strong>
-            <p className="text-[12.5px] text-ink-soft">Every successful referral earns a flat ₹300 voucher, no ladder — running until 31 Dec 2026.</p>
+      {promotion.active && (
+        <div className="mb-[26px] flex flex-wrap items-center justify-between gap-3 rounded-lg border border-mustard bg-[#f0e2cf] px-5 py-4">
+          <div className="flex items-start gap-3">
+            <IconRocket size={19} className="mt-px shrink-0 text-mustard-dark" stroke={1.75} />
+            <div>
+              <strong className="mb-0.5 block text-[13.5px]">Launch promotion is active</strong>
+              <p className="text-[12.5px] text-ink-soft">
+                {PROMO_MODE_COPY[promotion.mode](promotion)}
+                {promotion.endsAt && ` Running until ${new Date(promotion.endsAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}.`}
+              </p>
+            </div>
           </div>
+          <span className="cursor-pointer text-[12.5px] font-semibold text-navyblue hover:underline" onClick={() => onNavigate("rules")}>
+            Manage promotion →
+          </span>
         </div>
-        <span className="cursor-pointer text-[12.5px] font-semibold text-navyblue hover:underline" onClick={() => onNavigate("rules")}>
-          Manage promotion →
-        </span>
-      </div>
+      )}
 
       <div className="mb-7 grid grid-cols-2 gap-4 md:grid-cols-4">
         {stats.map((s) => (
@@ -55,8 +72,8 @@ export function OverviewSection({ onNavigate }: { onNavigate: (section: AdminSec
               </tr>
             </thead>
             <tbody>
-              {activity.map((row) => (
-                <tr key={row.listingRef} className="last:[&>td]:border-b-0">
+              {activity.map((row, i) => (
+                <tr key={`${row.listingRef}-${i}`} className="last:[&>td]:border-b-0">
                   <td className="border-b border-line-soft px-3 py-[11px] font-mono text-[13px]">{row.listingRef}</td>
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">{row.type}</td>
                   <td className="border-b border-line-soft px-3 py-[11px] font-mono text-[13px]">{row.referrerCode}</td>
@@ -64,6 +81,13 @@ export function OverviewSection({ onNavigate }: { onNavigate: (section: AdminSec
                   <td className="border-b border-line-soft px-3 py-[11px] text-[13px]">+{row.credits.toLocaleString("en-IN")}</td>
                 </tr>
               ))}
+              {activity.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-3 py-6 text-center text-[13px] text-ink-soft">
+                    No referral activity yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

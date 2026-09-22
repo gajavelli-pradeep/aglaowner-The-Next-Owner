@@ -1,27 +1,4 @@
-import type { AdminActivityItem, AdminReferrer, AdminStat, ListingTypeSetting, SettingsSurface, VoucherProviderConnect } from "@/types/admin";
-
-export const overviewStats: AdminStat[] = [
-  { value: "142", label: "Total referrers" },
-  { value: "38", label: "Referrals this month" },
-  { value: "612,000", label: "Credits issued (all cycles)" },
-  { value: "₹41,200", label: "Voucher value redeemed" },
-];
-
-export const overviewActivity: AdminActivityItem[] = [
-  { listingRef: "AGL-9T21", type: "Business", referrerCode: "AGL-REF-7F42", date: "13 Jul 2026", credits: 10000 },
-  { listingRef: "AGL-E551", type: "Equipment & assets", referrerCode: "AGL-REF-3C19", date: "12 Jul 2026", credits: 2000 },
-  { listingRef: "AGL-L402", type: "Space handover", referrerCode: "AGL-REF-7F42", date: "11 Jul 2026", credits: 5000 },
-  { listingRef: "AGL-I209", type: "Inventory & stock", referrerCode: "AGL-REF-9K05", date: "10 Jul 2026", credits: 3000 },
-  { listingRef: "AGL-4B87", type: "Business", referrerCode: "AGL-REF-9K05", date: "10 Jul 2026", credits: 10000 },
-];
-
-export const adminReferrers: AdminReferrer[] = [
-  { code: "AGL-REF-7F42", mobile: "+91 98xxxxx741", referrals: 4, cycleProgress: 27000, cycleTarget: 50000, status: "active", statusLabel: "Active" },
-  { code: "AGL-REF-3C19", mobile: "+91 96xxxxx208", referrals: 1, cycleProgress: 2000, cycleTarget: 50000, status: "active", statusLabel: "Active" },
-  { code: "AGL-REF-9K05", mobile: "+91 90xxxxx554", referrals: 7, cycleProgress: 18000, cycleTarget: 50000, status: "active", statusLabel: "Active" },
-  { code: "AGL-REF-1M88", mobile: "+91 88xxxxx902", referrals: 0, cycleProgress: 0, cycleTarget: 50000, status: "inactive", statusLabel: "No referrals yet" },
-  { code: "AGL-REF-5D63", mobile: "+91 97xxxxx317", referrals: 12, cycleProgress: 9000, cycleTarget: 50000, status: "active", statusLabel: "Active" },
-];
+import type { ListingTypeSetting, SettingsSurface, VoucherProviderConnect } from "@/types/admin";
 
 export const listingTypeSettings: ListingTypeSetting[] = [
   { type: "Business", activeDays: 90, archiveDays: 120, listingFee: 799, reactivationFee: 499 },
