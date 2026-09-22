@@ -30,9 +30,9 @@ export function AdminApp({
   const { message, show, showToast } = useToast();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <AdminSidebar active={section} onNavigate={setSection} adminEmail={adminEmail} />
-      <main className="max-w-[1180px] flex-1 px-10 py-8">
+      <main className="max-w-[1180px] flex-1 px-5 py-6 md:px-10 md:py-8">
         {section === "overview" && <OverviewSection onNavigate={setSection} />}
         {section === "referrers" && <ReferrersSection onToast={showToast} />}
         {section === "rules" && (
