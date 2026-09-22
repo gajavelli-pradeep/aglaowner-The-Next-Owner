@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { IconPhoto, IconVideo, IconStar, IconX, IconCameraPlus } from "@tabler/icons-react";
+import { compressImage, validateVideo } from "@/lib/mediaLimits";
 
 interface Slot {
   type: "photo" | "video";
@@ -19,7 +20,7 @@ function initialSlots(): Slot[] {
 }
 
 /** .media-grid + .uploadbox — real file picker, cover selection, and slot removal (blob URLs, no upload backend). */
-export function MediaUploadGrid({ onToast }: { onToast: (msg: string) => void }) {
+export function MediaUploadGrid({ onToast }: { onToast: (msg: string, variant?: "default" | "error") => void }) {
   const [slots, setSlots] = useState<Slot[]>(initialSlots);
   const [coverIndex, setCoverIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,11 +47,24 @@ export function MediaUploadGrid({ onToast }: { onToast: (msg: string) => void })
     onToast("You've used all 8 photo and 2 video slots");
   }
 
-  function handleFiles(fileList: FileList | null) {
+  async function handleFiles(fileList: FileList | null) {
     if (!fileList || !fileList.length) return;
     const type = pendingType.current;
-    const files = Array.from(fileList).filter((f) => (type === "video" ? f.type.startsWith("video/") : f.type.startsWith("image/")));
+    let files = Array.from(fileList).filter((f) => (type === "video" ? f.type.startsWith("video/") : f.type.startsWith("image/")));
     if (!files.length) return;
+
+    if (type === "video") {
+      const validated: File[] = [];
+      for (const file of files) {
+        const error = await validateVideo(file);
+        if (error) onToast(error, "error");
+        else validated.push(file);
+      }
+      files = validated;
+      if (!files.length) return;
+    } else {
+      files = await Promise.all(files.map(compressImage));
+    }
 
     setSlots((prev) => {
       const next = [...prev];

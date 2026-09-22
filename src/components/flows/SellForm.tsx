@@ -10,6 +10,7 @@ import { SubmitButton } from "@/components/ui/Buttons";
 import { iconFor } from "@/lib/tablerIconMap";
 import { getDemoReferrer } from "@/lib/data/listings";
 import { isValidMobile } from "@/lib/validation";
+import { isTestModeEnabled } from "@/lib/testMode";
 import type { ListingType } from "@/types/listing";
 
 const INCLUDE_OPTIONS = ["Furniture", "Kitchen equipment", "Fixtures & fittings", "Signage", "AC / electricals"];
@@ -54,6 +55,8 @@ export function SellForm({
   const [referralCode, setReferralCode] = useState("");
   const [refError, setRefError] = useState(false);
   const [mobileError, setMobileError] = useState(false);
+  const [mobileUnavailable, setMobileUnavailable] = useState(false);
+  const testMode = isTestModeEnabled();
   const [debtOption, setDebtOption] = useState<"no" | "yes">("no");
   const [addEquip, setAddEquip] = useState(false);
   const [includeSelected, setIncludeSelected] = useState<string[]>([]);
@@ -242,8 +245,9 @@ export function SellForm({
 
         {showMobile && (
           <div className="mb-[22px]">
-            <label className="mb-2 block text-[13px] font-semibold">
+            <label className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold">
               Your mobile number <span className="text-[11px] font-normal text-ink-soft">this is how you&apos;ll manage &amp; reactivate this listing later</span>
+              {testMode && <span className="rounded bg-mustard px-1.5 py-0.5 text-[9px] font-bold tracking-[0.04em] text-paper uppercase">Test mode</span>}
             </label>
             <div className="flex gap-2.5">
               <span className="flex w-[58px] shrink-0 items-center justify-center rounded border border-line bg-paper-2 px-2 py-[11px] text-sm text-ink-soft">
@@ -255,6 +259,7 @@ export function SellForm({
                 onChange={(e) => {
                   setMobile(e.target.value);
                   setMobileError(false);
+                  setMobileUnavailable(false);
                 }}
                 placeholder="98xxxxxxx1"
                 maxLength={10}
@@ -265,9 +270,15 @@ export function SellForm({
                 onClick={() => {
                   if (!isValidMobile(mobile)) {
                     setMobileError(true);
+                    setMobileUnavailable(false);
                     return;
                   }
                   setMobileError(false);
+                  if (!testMode) {
+                    setMobileUnavailable(true);
+                    return;
+                  }
+                  setMobileUnavailable(false);
                   setOtpSent(true);
                 }}
                 className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper"
@@ -277,6 +288,9 @@ export function SellForm({
             </div>
             <RefError show={mobileError}>
               <IconAlertCircle size={14} /> {otpSent ? "Verify your mobile number before continuing." : "Enter a valid 10-digit mobile number."}
+            </RefError>
+            <RefError show={mobileUnavailable}>
+              <IconAlertCircle size={14} /> Phone verification isn&apos;t connected yet -- check back soon.
             </RefError>
             <OtpStatus show={otpSent} />
           </div>
