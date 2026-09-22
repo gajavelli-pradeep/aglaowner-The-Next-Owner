@@ -5,19 +5,28 @@ import { IconAlertCircle } from "@tabler/icons-react";
 import { SubmitButton } from "@/components/ui/Buttons";
 import { OtpStatus, RefError } from "@/components/ui/Misc";
 import { isValidMobile } from "@/lib/validation";
+import { isTestModeEnabled } from "@/lib/testMode";
 
 export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
   const [mobile, setMobile] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [mobileError, setMobileError] = useState(false);
+  const [mobileUnavailable, setMobileUnavailable] = useState(false);
   const [otpRequiredError, setOtpRequiredError] = useState(false);
+  const testMode = isTestModeEnabled();
 
   function handleSend() {
     if (!isValidMobile(mobile)) {
       setMobileError(true);
+      setMobileUnavailable(false);
       return;
     }
     setMobileError(false);
+    if (!testMode) {
+      setMobileUnavailable(true);
+      return;
+    }
+    setMobileUnavailable(false);
     setOtpSent(true);
   }
 
@@ -38,7 +47,10 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
       </div>
       <div className="mt-6 max-w-[440px] rounded-lg border border-line bg-paper p-7">
         <div className="mb-[22px]">
-          <label className="mb-2 block text-[13px] font-semibold">Mobile number</label>
+          <label className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold">
+            Mobile number
+            {testMode && <span className="rounded bg-mustard px-1.5 py-0.5 text-[9px] font-bold tracking-[0.04em] text-paper uppercase">Test mode</span>}
+          </label>
           <div className="flex gap-2.5">
             <span className="flex w-[58px] shrink-0 items-center justify-center rounded border border-line bg-paper-2 px-2 py-[11px] text-sm text-ink-soft">
               +91
@@ -49,6 +61,7 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
               onChange={(e) => {
                 setMobile(e.target.value);
                 setMobileError(false);
+                setMobileUnavailable(false);
               }}
               placeholder="98xxxxxxx1"
               maxLength={10}
@@ -60,6 +73,9 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
           </div>
           <RefError show={mobileError}>
             <IconAlertCircle size={14} /> Enter a valid 10-digit mobile number.
+          </RefError>
+          <RefError show={mobileUnavailable}>
+            <IconAlertCircle size={14} /> Phone verification isn&apos;t connected yet -- check back soon.
           </RefError>
           <OtpStatus show={otpSent} />
         </div>

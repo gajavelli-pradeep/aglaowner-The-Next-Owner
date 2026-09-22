@@ -1,0 +1,13 @@
+# aglaowner
+
+> A commission-free marketplace for selling a business, equipment & assets, a lease/space handover, or excess inventory in India. Sellers pay a one-time listing fee; buyers browse and connect for free. A referral program lets anyone earn credits and vouchers for referring sellers.
+
+## Pages
+- [Marketplace](https://aglaowner.vercel.app/): browse and list businesses, equipment, leases, and inventory for sale
+- [Sell](https://aglaowner.vercel.app/sell): list a business, equipment, lease, or inventory
+- [Buy](https://aglaowner.vercel.app/buy): browse listings by category
+- [Find & reactivate](https://aglaowner.vercel.app/reactivate): look up and reactivate an existing listing
+- [Referral network](https://aglaowner.vercel.app/referral): get a referral code, earn credits, redeem vouchers
+
+## Notes
+No commission is ever charged to buyers or on a completed sale — the platform's only revenue is the one-time seller listing fee.
