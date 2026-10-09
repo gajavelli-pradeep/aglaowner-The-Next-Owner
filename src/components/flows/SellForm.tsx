@@ -11,6 +11,7 @@ import { iconFor } from "@/lib/tablerIconMap";
 import { getDemoReferrer } from "@/lib/data/listings";
 import { isValidMobile } from "@/lib/validation";
 import { isTestModeEnabled } from "@/lib/testMode";
+import { OtpCodeEntry } from "@/components/ui/OtpCodeEntry";
 import type { ListingType } from "@/types/listing";
 
 const INCLUDE_OPTIONS = ["Furniture", "Kitchen equipment", "Fixtures & fittings", "Signage", "AC / electricals"];
@@ -51,6 +52,7 @@ export function SellForm({
   const demoReferrer = getDemoReferrer();
 
   const [otpSent, setOtpSent] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
   const [mobile, setMobile] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [refError, setRefError] = useState(false);
@@ -260,6 +262,8 @@ export function SellForm({
                   setMobile(e.target.value);
                   setMobileError(false);
                   setMobileUnavailable(false);
+                  setCodeSent(false);
+                  setOtpSent(false);
                 }}
                 placeholder="98xxxxxxx1"
                 maxLength={10}
@@ -279,7 +283,7 @@ export function SellForm({
                     return;
                   }
                   setMobileUnavailable(false);
-                  setOtpSent(true);
+                  setCodeSent(true);
                 }}
                 className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper"
               >
@@ -287,11 +291,12 @@ export function SellForm({
               </button>
             </div>
             <RefError show={mobileError}>
-              <IconAlertCircle size={14} /> {otpSent ? "Verify your mobile number before continuing." : "Enter a valid 10-digit mobile number."}
+              <IconAlertCircle size={14} /> {codeSent ? "Enter the OTP to verify your number before continuing." : "Enter a valid 10-digit mobile number."}
             </RefError>
             <RefError show={mobileUnavailable}>
               <IconAlertCircle size={14} /> Phone verification isn&apos;t connected yet -- check back soon.
             </RefError>
+            {codeSent && !otpSent && <OtpCodeEntry onVerified={() => setOtpSent(true)} />}
             <OtpStatus show={otpSent} />
           </div>
         )}

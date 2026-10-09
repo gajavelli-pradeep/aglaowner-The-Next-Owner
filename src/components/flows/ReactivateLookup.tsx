@@ -6,10 +6,12 @@ import { SubmitButton } from "@/components/ui/Buttons";
 import { OtpStatus, RefError } from "@/components/ui/Misc";
 import { isValidMobile } from "@/lib/validation";
 import { isTestModeEnabled } from "@/lib/testMode";
+import { OtpCodeEntry } from "@/components/ui/OtpCodeEntry";
 
 export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
   const [mobile, setMobile] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
   const [mobileError, setMobileError] = useState(false);
   const [mobileUnavailable, setMobileUnavailable] = useState(false);
   const [otpRequiredError, setOtpRequiredError] = useState(false);
@@ -27,7 +29,7 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
       return;
     }
     setMobileUnavailable(false);
-    setOtpSent(true);
+    setCodeSent(true);
   }
 
   function handleContinue() {
@@ -62,6 +64,8 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
                 setMobile(e.target.value);
                 setMobileError(false);
                 setMobileUnavailable(false);
+                setCodeSent(false);
+                setOtpSent(false);
               }}
               placeholder="98xxxxxxx1"
               maxLength={10}
@@ -77,14 +81,9 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
           <RefError show={mobileUnavailable}>
             <IconAlertCircle size={14} /> Phone verification isn&apos;t connected yet -- check back soon.
           </RefError>
+          {codeSent && !otpSent && <OtpCodeEntry onVerified={() => setOtpSent(true)} />}
           <OtpStatus show={otpSent} />
         </div>
-        {otpSent && (
-          <div className="mb-[22px]">
-            <label className="mb-2 block text-[13px] font-semibold">Enter OTP</label>
-            <input type="text" maxLength={4} placeholder="4-digit code" className="w-full rounded border border-line bg-paper-2 px-3 py-[11px] text-sm" />
-          </div>
-        )}
         <RefError show={otpRequiredError}>
           <IconAlertCircle size={14} /> Verify your mobile number first.
         </RefError>

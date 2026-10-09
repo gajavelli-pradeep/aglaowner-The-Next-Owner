@@ -29,7 +29,7 @@ export function DashboardLookup({ onSubmit }: { onSubmit: () => void }) {
           onSubmit();
         }}
       >
-        <OtpField verified={verified} onSend={() => setVerified(true)} />
+        <OtpField verified={verified} onVerified={() => setVerified(true)} />
         <RefError show={notVerifiedError}>
           <IconAlertCircle size={14} /> Verify your mobile number first.
         </RefError>
