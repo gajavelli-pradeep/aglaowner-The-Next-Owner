@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { OtpStatus, RefError } from "@/components/ui/Misc";
+import { OtpCodeEntry } from "@/components/ui/OtpCodeEntry";
 import { isValidMobile } from "@/lib/validation";
 import { isTestModeEnabled } from "@/lib/testMode";
 
-/** .otprow — country code + mobile number + Send OTP button + verified status, shared by both referral forms. */
-export function OtpField({ verified, onSend }: { verified: boolean; onSend: () => void }) {
+/** .otprow — country code + mobile number + Send OTP button + code entry + verified status, shared by both referral forms. */
+export function OtpField({ verified, onVerified }: { verified: boolean; onVerified: () => void }) {
   const [mobile, setMobile] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
   const [error, setError] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const testMode = isTestModeEnabled();
@@ -27,7 +29,7 @@ export function OtpField({ verified, onSend }: { verified: boolean; onSend: () =
       return;
     }
     setUnavailable(false);
-    onSend();
+    setCodeSent(true);
   }
 
   return (
@@ -47,6 +49,7 @@ export function OtpField({ verified, onSend }: { verified: boolean; onSend: () =
             setMobile(e.target.value);
             setError(false);
             setUnavailable(false);
+            setCodeSent(false);
           }}
           placeholder="98xxxxxxx1"
           maxLength={10}
@@ -66,6 +69,7 @@ export function OtpField({ verified, onSend }: { verified: boolean; onSend: () =
       <RefError show={unavailable}>
         <IconAlertCircle size={14} /> Phone verification isn&apos;t connected yet -- check back soon.
       </RefError>
+      {codeSent && !verified && <OtpCodeEntry onVerified={onVerified} />}
       <OtpStatus show={verified} />
     </div>
   );
