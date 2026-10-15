@@ -98,7 +98,7 @@ export function SellForm({
         <p className="mb-5 text-[13px] text-ink-soft">{editDefaults ? "You're verified — update anything below and save." : copy.subtitle}</p>
       </div>
 
-      <div className="mb-6 rounded-lg border border-line bg-paper p-7">
+      <div className="mb-6 rounded-lg border border-line bg-paper p-5 sm:p-7">
         <div className="mb-[22px]">
           <label className="mb-2 block text-[13px] font-semibold">
             Photos &amp; Videos <span className="ml-1.5 text-[11px] font-normal text-ink-soft">up to 8 images &amp; 2 videos (30 secs each)</span>
@@ -247,7 +247,7 @@ export function SellForm({
 
         {showMobile && (
           <div className="mb-[22px]">
-            <label className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold">
+            <label className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold">
               Your mobile number <span className="text-[11px] font-normal text-ink-soft">this is how you&apos;ll manage &amp; reactivate this listing later</span>
               {testMode && <span className="rounded bg-mustard px-1.5 py-0.5 text-[9px] font-bold tracking-[0.04em] text-paper uppercase">Test mode</span>}
             </label>
@@ -267,7 +267,7 @@ export function SellForm({
                 }}
                 placeholder="98xxxxxxx1"
                 maxLength={10}
-                className="flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
+                className="min-w-0 flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
               />
               <button
                 type="button"
@@ -285,7 +285,7 @@ export function SellForm({
                   setMobileUnavailable(false);
                   setCodeSent(true);
                 }}
-                className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper"
+                className="rounded bg-ink px-3 text-[13px] font-semibold whitespace-nowrap text-paper sm:px-[18px]"
               >
                 Send OTP
               </button>

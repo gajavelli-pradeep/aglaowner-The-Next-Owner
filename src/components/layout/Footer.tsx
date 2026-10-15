@@ -29,7 +29,7 @@ export function Footer({ onCategory, onAllCategories }: { onCategory: (name: str
               href="/referral"
               className="inline-flex items-center gap-1.5 rounded-md border border-stamp-green bg-paper px-3.5 py-2 text-[13px] font-semibold text-stamp-green"
             >
-              <IconBadge size={16} /> Join our referral network &amp; earn
+              <IconBadge size={16} className="shrink-0" /> Join our referral network &amp; earn
             </a>
           </div>
         </div>
@@ -38,13 +38,13 @@ export function Footer({ onCategory, onAllCategories }: { onCategory: (name: str
           <ul className="space-y-2">
             {categories.map((c) => (
               <li key={c.slug} className="text-[13.5px]">
-                <button type="button" onClick={() => onCategory(c.name)} className="hover:text-oxide">
+                <button type="button" onClick={() => onCategory(c.name)} className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">
                   {c.name}
                 </button>
               </li>
             ))}
             <li className="text-[13.5px]">
-              <button type="button" onClick={onAllCategories} className="hover:text-oxide">
+              <button type="button" onClick={onAllCategories} className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">
                 All categories
               </button>
             </li>
@@ -53,24 +53,24 @@ export function Footer({ onCategory, onAllCategories }: { onCategory: (name: str
         <div>
           <h5 className="mb-3.5 text-xs tracking-[0.06em] text-ink-soft uppercase">Company</h5>
           <ul className="space-y-2">
-            <li className="text-[13.5px]"><a href="#how-it-works" className="hover:text-oxide">How it works</a></li>
-            <li className="text-[13.5px]"><a href="#archive" className="hover:text-oxide">Archive &amp; renewal</a></li>
-            <li className="text-[13.5px]"><a href="#pricing" className="hover:text-oxide">Pricing</a></li>
-            <li className="text-[13.5px]"><a href="#faq" className="hover:text-oxide">FAQ</a></li>
+            <li className="text-[13.5px]"><a href="#how-it-works" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">How it works</a></li>
+            <li className="text-[13.5px]"><a href="#archive" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">Archive &amp; renewal</a></li>
+            <li className="text-[13.5px]"><a href="#pricing" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">Pricing</a></li>
+            <li className="text-[13.5px]"><a href="#faq" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">FAQ</a></li>
           </ul>
         </div>
         <div>
           <h5 className="mb-3.5 text-xs tracking-[0.06em] text-ink-soft uppercase">Legal</h5>
           <ul className="space-y-2">
-            <li className="text-[13.5px]"><a href="#" className="hover:text-oxide">Terms of use</a></li>
-            <li className="text-[13.5px]"><a href="#" className="hover:text-oxide">Privacy policy</a></li>
-            <li className="text-[13.5px]"><a href="#" className="hover:text-oxide">Grievance redressal</a></li>
+            <li className="text-[13.5px]"><a href="#" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">Terms of use</a></li>
+            <li className="text-[13.5px]"><a href="#" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">Privacy policy</a></li>
+            <li className="text-[13.5px]"><a href="#" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">Grievance redressal</a></li>
           </ul>
         </div>
       </div>
       <div className="mx-auto flex max-w-[1080px] flex-wrap justify-between gap-2.5 border-t border-line px-6 py-[18px] text-xs text-ink-soft">
         <span>© 2026 aglaowner. A listing platform only — we do not broker, value or guarantee any transaction.</span>
-        <span><a href="#" className="hover:text-oxide">contact@aglaowner.in</a></span>
+        <span><a href="#" className="inline-flex items-center hover:text-oxide pointer-coarse:min-h-11">contact@aglaowner.in</a></span>
       </div>
     </footer>
   );

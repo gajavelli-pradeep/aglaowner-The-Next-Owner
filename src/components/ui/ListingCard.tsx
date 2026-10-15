@@ -31,7 +31,7 @@ export function ListingCard({
       <div className="relative flex h-[130px] items-center justify-center border-b border-line bg-paper-2">
         <Icon size={30} className="text-line" />
         <div
-          className={`absolute top-2 right-2 flex h-[52px] w-[52px] -rotate-[9deg] items-center justify-center rounded-full border-2 border-dashed bg-paper/90 text-center ${
+          className={`absolute top-2 right-2 flex h-[52px] w-[52px] -rotate-[9deg] items-center justify-center rounded-full border-2 border-dashed bg-paper/90 px-1.5 text-center ${
             warn ? "border-mustard" : "border-stamp-green"
           }`}
         >

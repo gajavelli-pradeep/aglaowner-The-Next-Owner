@@ -47,7 +47,7 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
         <h2 className="mb-1.5 text-[22px] sm:text-2xl">Find your listing</h2>
         <p className="text-[14.5px] text-ink-soft">Enter the mobile number you used when you first listed. No account, no password.</p>
       </div>
-      <div className="mt-6 max-w-[440px] rounded-lg border border-line bg-paper p-7">
+      <div className="mt-6 max-w-[440px] rounded-lg border border-line bg-paper p-5 sm:p-7">
         <div className="mb-[22px]">
           <label className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold">
             Mobile number
@@ -69,9 +69,9 @@ export function ReactivateLookup({ onContinue }: { onContinue: () => void }) {
               }}
               placeholder="98xxxxxxx1"
               maxLength={10}
-              className="flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
+              className="min-w-0 flex-1 rounded border border-line bg-paper-2 px-3 py-[11px] text-sm"
             />
-            <button type="button" onClick={handleSend} className="rounded bg-ink px-[18px] text-[13px] font-semibold whitespace-nowrap text-paper">
+            <button type="button" onClick={handleSend} className="rounded bg-ink px-3 text-[13px] font-semibold whitespace-nowrap text-paper sm:px-[18px]">
               Send OTP
             </button>
           </div>
