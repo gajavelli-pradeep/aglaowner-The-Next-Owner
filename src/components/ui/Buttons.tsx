@@ -37,7 +37,7 @@ export function ButtonText({ className = "", ...props }: BaseProps) {
 export function BackButton({ className = "", ...props }: BaseProps) {
   return (
     <button
-      className={`flex items-center gap-1.5 px-1 py-[9px] text-[13px] font-semibold text-ink-soft transition-colors hover:text-oxide ${className}`}
+      className={`flex items-center gap-1.5 px-1 py-[9px] text-[13px] font-semibold text-ink-soft transition-colors hover:text-oxide pointer-coarse:min-h-11 ${className}`}
       {...props}
     >
       <IconArrowLeft size={16} /> Back

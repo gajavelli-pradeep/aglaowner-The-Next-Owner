@@ -28,7 +28,7 @@ export function ListingDetail({ type, listing, onConnect }: { type: ListingType;
 
   return (
     <div className="mx-auto max-w-[1080px] px-6">
-      <div className="pb-0">
+      <div className="pt-7">
         <h2 className="mb-1.5 text-[22px] sm:text-2xl">{listing.title}</h2>
         <p className="flex items-center gap-1 text-ink-soft">
           <IconMapPin size={16} /> {listing.loc}
@@ -65,7 +65,7 @@ export function ListingDetail({ type, listing, onConnect }: { type: ListingType;
         </div>
         <p className="text-sm leading-[1.6] text-ink-soft">{listing.desc}</p>
       </div>
-      <div className="my-12 flex justify-center rounded-lg border border-line bg-paper-2 px-[22px] py-[18px]">
+      <div className="my-12 flex max-w-[640px] justify-center rounded-lg border border-line bg-paper-2 px-[22px] py-[18px]">
         <SubmitButton onClick={onConnect} className="flex w-full items-center justify-center gap-1.5">
           <IconShieldCheck size={16} /> Connect with seller
         </SubmitButton>
